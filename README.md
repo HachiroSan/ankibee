@@ -1,10 +1,10 @@
-# AnkiBee
+# AnkiBee: Master Spelling Bees with Smart Flashcards 🐝
 
 <div align="center">
   <img src="https://github.com/HachiroSan/ankibee/blob/27896b87beaf3264ba60f16bf5ae99fa031c82d0/resources/icon.png" alt="AnkiBee Logo" width="120"/>
 </div>
 
-A desktop application designed to help teachers and students master spelling bee competitions through intelligent flashcard creation and comprehensive audio pronunciation training. To be used in conjunction with the [Anki](https://apps.ankiweb.net/) flashcard application.
+Tired of struggling with spelling bee preparation? Frustrated by inconsistent practice methods and scattered resources? AnkiBee is a desktop application designed to streamline spelling bee training through intelligent flashcard creation and comprehensive audio pronunciation practice. Built on top of [Anki](https://apps.ankiweb.net/)'s powerful spaced repetition system, it combines proven memory techniques with specialized spelling bee training features to help teachers and students achieve competition success.
 
 <div align="center">
   <a href="https://github.com/HachiroSan/ankibee/releases/latest">
