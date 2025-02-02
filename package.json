@@ -2,7 +2,7 @@
   "private": true,
   "name": "ankibee",
   "description": "A modern Anki deck creator for spelling bee practice",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Hachiro",
   "main": "app/background.js",
   "scripts": {
