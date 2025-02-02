@@ -34,6 +34,7 @@
     "git": "^0.1.5",
     "lucide-react": "^0.474.0",
     "node-fetch": "2",
+    "openai": "^4.82.0",
     "react-icons": "^5.4.0",
     "sonner": "^1.7.4",
     "tailwind-merge": "^3.0.1",
