@@ -4,7 +4,7 @@
   <img src="https://github.com/HachiroSan/ankibee/blob/27896b87beaf3264ba60f16bf5ae99fa031c82d0/resources/icon.png" alt="AnkiBee Logo" width="120"/>
 </div>
 
-A modern desktop application for creating and managing Anki flashcards focused on spelling bee practice, featuring audio pronunciation capabilities.
+A desktop application designed to help teachers and students master spelling bee competitions through intelligent flashcard creation and comprehensive audio pronunciation training. To be used in conjunction with the [Anki](https://apps.ankiweb.net/) flashcard application.
 
 <div align="center">
   <a href="https://github.com/HachiroSan/ankibee/releases/latest">
