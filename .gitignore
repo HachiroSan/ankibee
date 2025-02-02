@@ -2,18 +2,26 @@
 
 # dependencies
 /node_modules
+/.pnp
+.pnp.js
 
-# build outputs
-/.next
-/out
-/app
-/dist
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+/renderer/.next/
+/renderer/out/
+
+# production
 /build
+/dist
+/app
 
 # misc
 .DS_Store
 *.pem
-Thumbs.db
 
 # debug
 npm-debug.log*
