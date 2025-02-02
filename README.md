@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/HachiroSan/ankibee/main/resources/icon.png" alt="AnkiBee Logo" width="180"/>
+<img src="https://github.com/HachiroSan/ankibee/blob/27896b87beaf3264ba60f16bf5ae99fa031c82d0/resources/icon.png" alt="AnkiBee Logo" width="180"/>
 
 # AnkiBee
 
@@ -17,10 +17,11 @@
   <a href="#key-features">Key Features</a> •
   <a href="#installation">Installation</a> •
   <a href="#tech-stack">Tech Stack</a> •
+  <a href="#download">Download</a> •
   <a href="#license">License</a>
 </p>
 
-<img src="https://raw.githubusercontent.com/HachiroSan/ankibee/main/resources/screenshot.png" alt="AnkiBee Screenshot"/>
+<img src="https://github.com/HachiroSan/ankibee/blob/27896b87beaf3264ba60f16bf5ae99fa031c82d0/resources/screenshot.png" alt="AnkiBee Screenshot"/>
 
 </div>
 
@@ -46,6 +47,15 @@
 - Smart duplicate detection
 - Bulk audio fetching
 
+## 📥 Download
+
+Download the latest version of AnkiBee:
+
+- 💿 [Windows Installer](https://github.com/HachiroSan/ankibee/releases/latest/download/AnkiBee.Setup.1.0.0.exe) (Recommended)
+- 📦 [Portable Version](https://github.com/HachiroSan/ankibee/releases/latest/download/AnkiBee-1.0.0-win-x64-portable.zip)
+
+Or check out all releases on our [releases page](https://github.com/HachiroSan/ankibee/releases).
+
 ## 🚀 Installation
 
 ```bash
@@ -56,10 +66,10 @@ git clone https://github.com/HachiroSan/ankibee
 cd ankibee
 
 # Install dependencies
-npm install
+yarn install
 
 # Run the app
-npm run dev
+yarn dev
 ```
 
 ## 🛠 Tech Stack
@@ -90,14 +100,14 @@ npm run dev
 Create a production build:
 
 ```bash
-npm run build
+yarn build
 ```
 
 Find your packaged app in the `dist` directory.
 
 ## 📝 License
 
-This software is proprietary. See the [LICENSE](LICENSE) file for details.
+This software is licensed under the [GNU General Public License v3.0](LICENSE). You are free to use, modify, and distribute this software under the terms of the GPL-3.0 license.
 
 ---
 
