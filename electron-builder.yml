@@ -15,15 +15,15 @@ extraResources:
     filter:
       - "**/*"
 win:
-  target: nsis
-  icon: resources/icon.ico
-mac:
   target:
-    - target: dmg
+    - target: nsis
       arch:
         - x64
-        - arm64
-  darkModeSupport: true
+    - target: portable
+      arch:
+        - x64
+  icon: resources/icon.ico
+  artifactName: ${productName}-Setup-${version}.${ext}
 linux:
   target:
     - target: AppImage

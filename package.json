@@ -9,7 +9,6 @@
     "dev": "nextron",
     "build": "node scripts/setup-python.js && nextron build",
     "build:win": "node scripts/setup-python.js && nextron build --win --x64",
-    "build:mac": "node scripts/setup-python.js && nextron build --mac --x64",
     "build:linux": "node scripts/setup-python.js && nextron build --linux --x64",
     "postinstall": "electron-builder install-app-deps"
   },
