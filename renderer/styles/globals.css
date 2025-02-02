@@ -1,0 +1,139 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+
+    /* Honey theme */
+    --primary: 43 96% 56%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 40 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+
+    --muted: 40 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+
+    --accent: 43 96% 97%;
+    --accent-foreground: 43 96% 56%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+
+    --border: 40 5.9% 90%;
+    --input: 40 5.9% 90%;
+
+    --ring: 43 96% 56%;
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 240 10% 10%;
+    --foreground: 0 0% 98%;
+
+    /* Dark mode honey theme */
+    --primary: 43 96% 56%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 240 3.7% 20%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 240 3.7% 20%;
+    --muted-foreground: 240 5% 75%;
+
+    --accent: 43 70% 35%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --card: 240 10% 12%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 240 10% 12%;
+    --popover-foreground: 0 0% 98%;
+
+    --border: 240 3.7% 25%;
+    --input: 240 3.7% 25%;
+
+    --ring: 43 96% 56%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    @apply w-2;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-muted;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-primary/20 rounded-full hover:bg-primary/30 transition-colors;
+  }
+}
+
+/* Window drag regions */
+.app-drag-region {
+  -webkit-app-region: drag;
+  user-select: none;
+}
+
+.app-no-drag {
+  -webkit-app-region: no-drag;
+}
+
+@layer components {
+  /* Modern UI styles */
+  .gradio-container {
+    @apply p-4 sm:p-6 max-w-[1200px] mx-auto;
+  }
+
+  .gradio-card {
+    @apply bg-background rounded-xl border shadow-sm hover:shadow-md hover:border-primary/20 transition-all duration-300;
+  }
+
+  .gradio-input {
+    @apply rounded-lg border border-input bg-background hover:border-primary/30 focus:border-primary/40 focus:ring-2 focus:ring-primary/20 transition-all duration-200;
+  }
+
+  .gradio-button {
+    @apply rounded-lg font-medium transition-all duration-200 active:scale-[0.98];
+  }
+
+  /* Responsive text utilities */
+  .text-responsive {
+    @apply text-sm sm:text-base;
+  }
+
+  .heading-responsive {
+    @apply text-lg sm:text-xl lg:text-2xl;
+  }
+
+  /* Custom animations */
+  .hover-lift {
+    @apply transition-transform duration-200 hover:-translate-y-0.5;
+  }
+
+  .hover-glow {
+    @apply transition-shadow duration-200 hover:shadow-[0_0_15px_rgba(79,70,229,0.15)];
+  }
+}
