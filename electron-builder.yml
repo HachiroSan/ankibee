@@ -3,7 +3,7 @@ productName: AnkiBee
 copyright: Copyright © 2024 AnkiBee
 directories:
   output: dist
-  buildResources: build
+  buildResources: resources
 files:
   - from: .
     filter:
@@ -15,10 +15,8 @@ extraResources:
     filter:
       - "**/*"
 win:
-  target:
-    - target: nsis
-      arch:
-        - x64
+  target: nsis
+  icon: resources/icon.ico
 mac:
   target:
     - target: dmg
@@ -34,6 +32,7 @@ linux:
   category: Education
 nsis:
   oneClick: false
+  perMachine: false
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: true
   createStartMenuShortcut: true
@@ -42,3 +41,5 @@ publish:
   provider: github
   owner: HachiroSan
   repo: ankibee
+  private: false
+  releaseType: release
