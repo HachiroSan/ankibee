@@ -1,116 +1,110 @@
-<div align="center">
-
-<img src="https://github.com/HachiroSan/ankibee/blob/27896b87beaf3264ba60f16bf5ae99fa031c82d0/resources/icon.png" alt="AnkiBee Logo" width="180"/>
-
 # AnkiBee
 
-> 🐝 A modern desktop app for creating and managing spelling bee word cards with audio pronunciation
-
-<p align="center">
-  <img src="https://img.shields.io/badge/Electron-2B2E3A?style=for-the-badge&logo=electron&logoColor=9FEAF9" alt="Electron">
-  <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js">
-  <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript">
-  <img src="https://img.shields.io/badge/Tailwind-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind">
-</p>
-
-<p align="center">
-  <a href="#key-features">Key Features</a> •
-  <a href="#installation">Installation</a> •
-  <a href="#tech-stack">Tech Stack</a> •
-  <a href="#download">Download</a> •
-  <a href="#license">License</a>
-</p>
-
-<img src="https://github.com/HachiroSan/ankibee/blob/27896b87beaf3264ba60f16bf5ae99fa031c82d0/resources/screenshot.png" alt="AnkiBee Screenshot"/>
-
+<div align="center">
+  <img src="https://github.com/HachiroSan/ankibee/blob/27896b87beaf3264ba60f16bf5ae99fa031c82d0/resources/icon.png" alt="AnkiBee Logo" width="120"/>
 </div>
 
-## ✨ Key Features
+A modern desktop application for creating and managing Anki flashcards focused on spelling bee practice, featuring audio pronunciation capabilities.
 
-🎯 **Smart Word Cards**
-- Create beautiful spelling bee cards
-- Automatic definition fetching
-- Multiple audio source options
+<div align="center">
+  <a href="https://github.com/HachiroSan/ankibee/releases/latest">
+    <img src="https://img.shields.io/github/v/release/HachiroSan/ankibee?style=flat-square" alt="Latest Release">
+  </a>
+  <a href="https://github.com/HachiroSan/ankibee/blob/master/LICENSE">
+    <img src="https://img.shields.io/github/license/HachiroSan/ankibee?style=flat-square" alt="License">
+  </a>
+  <img src="https://img.shields.io/badge/platform-windows-lightgrey?style=flat-square" alt="Platform">
+</div>
 
-🎨 **Modern Interface**
-- Clean, intuitive design
-- Dark/light mode support
-- Responsive animations
+<div align="center">
+  <img src="https://img.shields.io/badge/Electron-2B2E3A?style=flat-square&logo=electron&logoColor=white" alt="Electron">
+  <img src="https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=nextdotjs&logoColor=white" alt="Next.js">
+  <img src="https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript">
+  <img src="https://img.shields.io/badge/Tailwind-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white" alt="Tailwind">
+</div>
 
-🔊 **Audio Integration**
-- Google Dictionary (US/UK)
-- Custom audio upload
-- Waveform visualization
+<div align="center">
+  <img src="https://github.com/HachiroSan/ankibee/blob/27896b87beaf3264ba60f16bf5ae99fa031c82d0/resources/screenshot.png" alt="AnkiBee Screenshot" width="800"/>
+</div>
 
-📚 **Batch Processing**
-- Import multiple words at once
-- Smart duplicate detection
-- Bulk audio fetching
+## Features
 
-## 📥 Download
+### Card Generation
+- Automated flashcard creation for spelling bee practice
+- Intelligent word definition fetching
+- Configurable audio pronunciation sources
 
-Download the latest version of AnkiBee:
+### Interface
+- Modern, minimalist design
+- Light and dark theme options
+- Performance-optimized animations
 
-- 💿 [Windows Installer](https://github.com/HachiroSan/ankibee/releases/latest/download/AnkiBee.Setup.1.0.0.exe) (Recommended)
-- 📦 [Portable Version](https://github.com/HachiroSan/ankibee/releases/latest/download/AnkiBee-1.0.0-win-x64-portable.zip)
+### Audio System
+- Integration with Google Dictionary API
+- Support for custom audio uploads
+- Real-time audio waveform display
 
-Or check out all releases on our [releases page](https://github.com/HachiroSan/ankibee/releases).
+### Batch Operations
+- Multi-word import functionality
+- Duplicate entry prevention
+- Parallel audio processing
 
-## 🚀 Installation
+## Installation
+
+### Download
+
+**Windows**
+- [Installer (Recommended)](https://github.com/HachiroSan/ankibee/releases/latest/download/AnkiBee.Setup.1.0.0.exe)
+- [Portable Version](https://github.com/HachiroSan/ankibee/releases/latest/download/AnkiBee-1.0.0-win-x64-portable.zip)
+
+View all releases on the [releases page](https://github.com/HachiroSan/ankibee/releases).
+
+### Development Setup
 
 ```bash
-# Clone this repository
+# Repository
 git clone https://github.com/HachiroSan/ankibee
-
-# Navigate to the directory
 cd ankibee
 
-# Install dependencies
+# Dependencies
 yarn install
 
-# Run the app
+# Development
 yarn dev
+
+# Production Build
+yarn build
 ```
 
-## 🛠 Tech Stack
+## Technology Stack
 
-<table>
-  <tr>
-    <td align="center" width="96">
-      <img src="https://raw.githubusercontent.com/github/explore/80688e429a7d4ef2fca1e82350fe8e3517d3494d/topics/electron/electron.png" width="48" height="48" alt="Electron" />
-      <br>Electron
-    </td>
-    <td align="center" width="96">
-      <img src="https://raw.githubusercontent.com/github/explore/28b02bbc9ad9f7a503c43775aebeb515dc2da5fc/topics/nextjs/nextjs.png" width="48" height="48" alt="Next.js" />
-      <br>Next.js
-    </td>
-    <td align="center" width="96">
-      <img src="https://raw.githubusercontent.com/github/explore/80688e429a7d4ef2fca1e82350fe8e3517d3494d/topics/typescript/typescript.png" width="48" height="48" alt="TypeScript" />
-      <br>TypeScript
-    </td>
-    <td align="center" width="96">
-      <img src="https://raw.githubusercontent.com/github/explore/80688e429a7d4ef2fca1e82350fe8e3517d3494d/topics/tailwind/tailwind.png" width="48" height="48" alt="Tailwind" />
-      <br>Tailwind
-    </td>
-  </tr>
-</table>
+| Technology | Purpose |
+|------------|---------|
+| Electron | Cross-platform desktop runtime |
+| Next.js | React framework for UI |
+| TypeScript | Type-safe development |
+| Tailwind CSS | Utility-first styling |
 
-## 📦 Building
+## Building
 
-Create a production build:
+To create a production build:
 
 ```bash
 yarn build
 ```
 
-Find your packaged app in the `dist` directory.
+The packaged application will be available in the `dist` directory.
 
-## 📝 License
+## License
 
-This software is licensed under the [GNU General Public License v3.0](LICENSE). You are free to use, modify, and distribute this software under the terms of the GPL-3.0 license.
+This software is licensed under the [GNU General Public License v3.0](LICENSE). Users are free to use, modify, and distribute this software under the terms specified in the GPL-3.0 license.
+
+## Contributing
+
+Contributions are welcome. Please read our [contributing guidelines](CONTRIBUTING.md) before submitting pull requests.
 
 ---
 
 <div align="center">
-  Made with ❤️ by Hachiro
+  <sub>Developed by Hachiro</sub>
 </div>
