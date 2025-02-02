@@ -3,16 +3,11 @@
 # dependencies
 /node_modules
 
-# next.js
+# build outputs
 /.next
 /out
-
-# nextron
 /app
-/app/*
 /dist
-
-# production
 /build
 
 # misc
@@ -29,9 +24,6 @@ yarn-error.log*
 .env*.local
 .env
 
-# vercel
-.vercel
-
 # typescript
 *.tsbuildinfo
 next-env.d.ts
@@ -41,15 +33,6 @@ next-env.d.ts
 .vscode
 *.swp
 *.swo
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
 
 # Python
 __pycache__/
