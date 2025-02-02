@@ -11,7 +11,7 @@ A modern desktop application for creating and managing Anki flashcards focused o
     <img src="https://img.shields.io/github/v/release/HachiroSan/ankibee?style=flat-square" alt="Latest Release">
   </a>
   <a href="https://github.com/HachiroSan/ankibee/blob/master/LICENSE">
-    <img src="https://img.shields.io/github/license/HachiroSan/ankibee?style=flat-square" alt="License">
+    <img src="https://img.shields.io/github/license/HachiroSan/ankibee?style=flat-square&logo=gnu&label=license&color=blue" alt="License">
   </a>
   <img src="https://img.shields.io/badge/platform-windows-lightgrey?style=flat-square" alt="Platform">
 </div>
