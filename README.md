@@ -99,10 +99,6 @@ The packaged application will be available in the `dist` directory.
 
 This software is licensed under the [GNU General Public License v3.0](LICENSE). Users are free to use, modify, and distribute this software under the terms specified in the GPL-3.0 license.
 
-## Contributing
-
-Contributions are welcome. Please read our [contributing guidelines](CONTRIBUTING.md) before submitting pull requests.
-
 ---
 
 <div align="center">
