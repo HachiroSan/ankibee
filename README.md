@@ -34,11 +34,6 @@ A modern desktop application for creating and managing Anki flashcards focused o
 - Intelligent word definition fetching
 - Configurable audio pronunciation sources
 
-### Interface
-- Modern, minimalist design
-- Light and dark theme options
-- Performance-optimized animations
-
 ### Audio System
 - Integration with Google Dictionary API
 - Support for custom audio uploads
@@ -98,9 +93,3 @@ The packaged application will be available in the `dist` directory.
 ## License
 
 This software is licensed under the [GNU General Public License v3.0](LICENSE). Users are free to use, modify, and distribute this software under the terms specified in the GPL-3.0 license.
-
----
-
-<div align="center">
-  <sub>Developed by Hachiro</sub>
-</div>
