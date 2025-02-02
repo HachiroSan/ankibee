@@ -1,0 +1,44 @@
+appId: com.ankibee.app
+productName: AnkiBee
+copyright: Copyright © 2024 AnkiBee
+directories:
+  output: dist
+  buildResources: build
+files:
+  - from: .
+    filter:
+      - package.json
+      - app
+extraResources:
+  - from: resources/python
+    to: python
+    filter:
+      - "**/*"
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+mac:
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+  darkModeSupport: true
+linux:
+  target:
+    - target: AppImage
+      arch:
+        - x64
+  category: Education
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: AnkiBee
+publish:
+  provider: github
+  owner: HachiroSan
+  repo: ankibee
