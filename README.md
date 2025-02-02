@@ -52,8 +52,8 @@ AnkiBee is a desktop application designed to streamline spelling bee training th
 ### Download
 
 **Windows**
-- [Installer (Recommended)](https://github.com/HachiroSan/ankibee/releases/latest/download/AnkiBee.Setup.1.0.0.exe)
-- [Portable Version](https://github.com/HachiroSan/ankibee/releases/latest/download/AnkiBee-1.0.0-win-x64-portable.zip)
+- [Installer ](https://github.com/HachiroSan/ankibee/releases/download/v1.0.1/AnkiBee-Setup-1.0.1.exe)
+- [Portable Version](https://github.com/HachiroSan/ankibee/releases/latest/download/AnkiBee-1.0.1.exe)
 
 View all releases on the [releases page](https://github.com/HachiroSan/ankibee/releases).
 
