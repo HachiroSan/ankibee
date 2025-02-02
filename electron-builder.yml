@@ -23,13 +23,6 @@ win:
       arch:
         - x64
   icon: resources/icon.ico
-  artifactName: ${productName}-Setup-${version}.${ext}
-linux:
-  target:
-    - target: AppImage
-      arch:
-        - x64
-  category: Education
 nsis:
   oneClick: false
   perMachine: false
@@ -37,6 +30,15 @@ nsis:
   createDesktopShortcut: true
   createStartMenuShortcut: true
   shortcutName: AnkiBee
+  artifactName: ${productName}-Setup-${version}.${ext}
+portable:
+  artifactName: ${productName}-${version}.${ext}
+linux:
+  target:
+    - target: AppImage
+      arch:
+        - x64
+  category: Education
 publish:
   provider: github
   owner: HachiroSan
