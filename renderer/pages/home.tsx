@@ -20,13 +20,20 @@ export default function HomePage({ autoLowercase = true }: HomePageProps) {
   const audioRef = React.useRef<HTMLDivElement>(null);
   const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system');
   const [isAutoLowercase, setIsAutoLowercase] = useState(autoLowercase);
+  const [isWordMasking, setIsWordMasking] = useState(false);
 
-  // Initialize theme
+  // Initialize theme and settings
   useEffect(() => {
     // Load saved theme
     const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | 'system';
     if (savedTheme) {
       handleThemeChange(savedTheme);
+    }
+
+    // Load saved word masking preference
+    const savedWordMasking = localStorage.getItem('wordMasking');
+    if (savedWordMasking) {
+      setIsWordMasking(savedWordMasking === 'true');
     }
   }, []);
 
@@ -292,6 +299,12 @@ export default function HomePage({ autoLowercase = true }: HomePageProps) {
     setIsAutoLowercase(enabled);
   };
 
+  const handleWordMaskingChange = (enabled: boolean) => {
+    setIsWordMasking(enabled);
+    // Save word masking preference
+    localStorage.setItem('wordMasking', String(enabled));
+  };
+
   return (
     <div className="absolute inset-x-0 bottom-0 top-8 flex flex-col overflow-hidden">
       <Head>
@@ -307,8 +320,10 @@ export default function HomePage({ autoLowercase = true }: HomePageProps) {
           cards={cards}
           theme={theme}
           autoLowercase={isAutoLowercase}
+          wordMasking={isWordMasking}
           onThemeChange={handleThemeChange}
           onAutoLowercaseChange={handleAutoLowercaseChange}
+          onWordMaskingChange={handleWordMaskingChange}
         />
       </div>
 
@@ -338,6 +353,7 @@ export default function HomePage({ autoLowercase = true }: HomePageProps) {
                 onClearDeck={() => setCards([])}
                 isLoading={isLoading}
                 autoLowercase={isAutoLowercase}
+                wordMasking={isWordMasking}
               />
             </div>
           </div>

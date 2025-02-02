@@ -20,8 +20,10 @@ interface DeckHeaderProps {
   cards: WordCard[];
   theme: 'light' | 'dark' | 'system';
   autoLowercase: boolean;
+  wordMasking: boolean;
   onThemeChange: (theme: 'light' | 'dark' | 'system') => void;
   onAutoLowercaseChange: (enabled: boolean) => void;
+  onWordMaskingChange: (enabled: boolean) => void;
 }
 
 export function DeckHeader({ 
@@ -30,8 +32,10 @@ export function DeckHeader({
   cards,
   theme,
   autoLowercase,
+  wordMasking,
   onThemeChange,
-  onAutoLowercaseChange
+  onAutoLowercaseChange,
+  onWordMaskingChange
 }: DeckHeaderProps) {
   const [isExportDialogOpen, setIsExportDialogOpen] = React.useState(false)
 
@@ -59,8 +63,10 @@ export function DeckHeader({
                 <SettingsDialog
                   theme={theme}
                   autoLowercase={autoLowercase}
+                  wordMasking={wordMasking}
                   onThemeChange={onThemeChange}
                   onAutoLowercaseChange={onAutoLowercaseChange}
+                  onWordMaskingChange={onWordMaskingChange}
                 />
               </div>
             </TooltipTrigger>
@@ -94,6 +100,7 @@ export function DeckHeader({
           deckName="AnkiBee Deck"
           cardCount={cardsCount}
           cards={cards}
+          wordMasking={wordMasking}
         />
       </div>
     </TooltipProvider>

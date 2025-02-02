@@ -124,7 +124,10 @@ export function EditCardDialog({ card, isOpen, onClose, onSave, isLoading, autoL
       word: autoLowercase === true ? word.toLowerCase() : word,
       definition: definition?.trim() || '',
       audioData,
-      audioSource
+      audioSource,
+      audioRegion: audioSource === 'google-us' ? 'us' : 
+                  audioSource === 'google-uk' ? 'gb' : 
+                  undefined
     });
     onClose();
   };
@@ -224,10 +227,28 @@ export function EditCardDialog({ card, isOpen, onClose, onSave, isLoading, autoL
                         <Input
                           type="file"
                           accept="audio/*"
-                          onChange={(e) => {
+                          onChange={async (e) => {
                             const file = e.target.files?.[0];
                             if (file) {
-                              setAudioFile(file);
+                              try {
+                                setAudioFile(file);
+                                setIsProcessing(true);
+                                const newAudioData = await file.arrayBuffer();
+                                
+                                if (audioRef.current) {
+                                  await loadAudioWaveform(newAudioData, audioRef.current, instanceId);
+                                }
+                                setAudioData(newAudioData);
+                                toast.success('Audio updated successfully');
+                              } catch (error) {
+                                console.error('Error processing custom audio:', error);
+                                toast.error('Failed to process audio file');
+                                setAudioFile(undefined);
+                                setAudioData(undefined);
+                                e.target.value = '';
+                              } finally {
+                                setIsProcessing(false);
+                              }
                             }
                           }}
                           className="hidden"

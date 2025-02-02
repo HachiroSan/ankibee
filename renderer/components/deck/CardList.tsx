@@ -9,11 +9,12 @@ import { Badge } from "@/components/ui/badge"
 
 interface CardListProps {
   cards: WordCard[];
-  onRemoveCard: (cardId: string) => void;
+  onRemoveCard: (id: string) => void;
   onPlayAudio: (audioData: ArrayBuffer) => void;
   onEditCard: (updatedCard: WordCard) => void;
   isLoading: boolean;
   autoLowercase?: boolean;
+  wordMasking?: boolean;
 }
 
 type SortOption = 'newest' | 'oldest' | 'a-z' | 'z-a';
@@ -25,7 +26,8 @@ export function CardList({
   onPlayAudio, 
   onEditCard,
   isLoading,
-  autoLowercase 
+  autoLowercase,
+  wordMasking 
 }: CardListProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortOption, setSortOption] = useState<SortOption>('newest');
@@ -201,6 +203,7 @@ export function CardList({
               onEdit={onEditCard}
               isLoading={isLoading}
               autoLowercase={autoLowercase}
+              wordMasking={wordMasking}
             />
           </motion.div>
         ))}

@@ -104,17 +104,35 @@ export function AddCardForm({ onSubmit, onBatchSubmit, isLoading: formIsLoading,
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (currentWord && currentDefinition && audioPreview) {
-      onSubmit(
-        currentWord, 
-        currentDefinition, 
-        currentAudio,
-        audioPreview.source
+      // Check for duplicates first
+      const wordToCheck = autoLowercase === true ? currentWord.toLowerCase() : currentWord;
+      const isDuplicate = existingCards.some(card => 
+        (autoLowercase === true ? card.word.toLowerCase() : card.word) === wordToCheck
       );
-      setCurrentWord('');
-      setCurrentDefinition('');
-      setCurrentAudio(undefined);
-      setAudioPreview(null);
-      setIsPlaying(false);
+
+      if (isDuplicate) {
+        toast.error(`The word "${wordToCheck}" already exists in your deck`);
+        return; // Don't proceed with submission or clearing
+      }
+
+      try {
+        await onSubmit(
+          currentWord, 
+          currentDefinition, 
+          currentAudio,
+          audioPreview.source
+        );
+        // Only clear form after successful submission
+        setCurrentWord('');
+        setCurrentDefinition('');
+        setCurrentAudio(undefined);
+        setAudioPreview(null);
+        setIsPlaying(false);
+      } catch (error) {
+        // Don't clear form if there's an error
+        console.error('Error submitting card:', error);
+        toast.error(error instanceof Error ? error.message : 'Failed to add card');
+      }
     } else if (!audioPreview) {
       toast.error('Please fetch and verify audio first');
     } else {
@@ -256,26 +274,19 @@ export function AddCardForm({ onSubmit, onBatchSubmit, isLoading: formIsLoading,
     setIsAudioFetching(true);
     
     try {
-      await toast.promise(
-        (async () => {
-          const audioData = await file.arrayBuffer();
-          
-          // Try to load it in WaveSurfer to validate it's a valid audio file
-          if (audioRef.current) {
-            await loadAudioWaveform(audioData, audioRef.current, instanceId);
-          }
+      const audioData = await file.arrayBuffer();
+      
+      // Try to load it in WaveSurfer to validate it's a valid audio file
+      if (audioRef.current) {
+        await loadAudioWaveform(audioData, audioRef.current, instanceId);
+      }
 
-          setCurrentAudio(file);
-          setAudioPreview({ audioData, source: 'custom' });
-        })(),
-        {
-          loading: 'Processing audio file...',
-          success: 'Audio ready for preview',
-          error: 'The selected file could not be processed as audio'
-        }
-      );
+      setCurrentAudio(file);
+      setAudioPreview({ audioData, source: 'custom' });
+      toast.success('Audio ready for preview');
     } catch (error) {
       console.error('Error processing custom audio:', error);
+      toast.error('The selected file could not be processed as audio');
       setCurrentAudio(undefined);
       setAudioPreview(null);
       e.target.value = ''; // Reset input

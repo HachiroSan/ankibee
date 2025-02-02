@@ -7,7 +7,7 @@ import { Play, Trash2, ChevronRight, RefreshCw, AlertCircle, Pencil } from "luci
 import { WordCard } from '@/types/deck'
 import { loadAudioWaveform, playAudio, wavesurferInstances } from '@/lib/dictionary-service'
 import { toast } from 'sonner'
-import { cn } from '@/lib/utils'
+import { cn, maskWord } from '@/lib/utils'
 import { EditCardDialog } from './EditCardDialog'
 import {
   Tooltip,
@@ -23,9 +23,10 @@ interface CollapsibleCardProps {
   onEdit: (updatedCard: WordCard) => void;
   isLoading: boolean;
   autoLowercase?: boolean;
+  wordMasking?: boolean;
 }
 
-export function CollapsibleCard({ card, onRemove, onPlayAudio, onEdit, isLoading, autoLowercase }: CollapsibleCardProps) {
+export function CollapsibleCard({ card, onRemove, onPlayAudio, onEdit, isLoading, autoLowercase, wordMasking }: CollapsibleCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -111,7 +112,7 @@ export function CollapsibleCard({ card, onRemove, onPlayAudio, onEdit, isLoading
                     </div>
                     {!isExpanded && card.definition && (
                       <p className="text-[11px] text-muted-foreground truncate mt-0.5">
-                        {card.definition}
+                        {wordMasking ? maskWord(card.definition, card.word) : card.definition}
                       </p>
                     )}
                   </div>
@@ -177,7 +178,9 @@ export function CollapsibleCard({ card, onRemove, onPlayAudio, onEdit, isLoading
                 <div className="space-y-1">
                   <div className="text-[11px] font-medium text-muted-foreground">Definition</div>
                   {card.definition ? (
-                    <p className="text-xs leading-normal whitespace-pre-line">{card.definition}</p>
+                    <p className="text-xs leading-normal whitespace-pre-line">
+                      {wordMasking ? maskWord(card.definition, card.word) : card.definition}
+                    </p>
                   ) : (
                     <div className="flex items-center gap-2 text-xs text-amber-500">
                       <AlertCircle className="h-3 w-3" />
@@ -224,7 +227,9 @@ export function CollapsibleCard({ card, onRemove, onPlayAudio, onEdit, isLoading
             <div>
               <p className="font-medium">{card.word}</p>
               {card.definition && (
-                <p className="text-sm text-muted-foreground">{card.definition}</p>
+                <p className="text-sm text-muted-foreground">
+                  {wordMasking ? maskWord(card.definition, card.word) : card.definition}
+                </p>
               )}
             </div>
             {card.audioData && (

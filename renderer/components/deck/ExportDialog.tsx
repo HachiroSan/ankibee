@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { WordCard } from '@/types/deck'
 import { toast } from 'sonner'
+import { maskWord } from '@/lib/utils'
 
 interface ExportResult {
   success: boolean;
@@ -17,9 +18,17 @@ interface ExportDialogProps {
   deckName: string;
   cardCount: number;
   cards: WordCard[];
+  wordMasking?: boolean;
 }
 
-export function ExportDialog({ isOpen, onClose, deckName: defaultDeckName, cardCount, cards }: ExportDialogProps) {
+export function ExportDialog({ 
+  isOpen, 
+  onClose, 
+  deckName: defaultDeckName, 
+  cardCount, 
+  cards,
+  wordMasking = false
+}: ExportDialogProps) {
   const [isExporting, setIsExporting] = React.useState(false)
   const [deckName, setDeckName] = React.useState(defaultDeckName)
   const [validationMessage, setValidationMessage] = React.useState<string | null>(null)
@@ -73,7 +82,11 @@ export function ExportDialog({ isOpen, onClose, deckName: defaultDeckName, cardC
         card.word?.trim() && 
         card.definition?.trim() &&
         (card.audioData || card.audioPath)
-      )
+      ).map(card => ({
+        ...card,
+        // Apply word masking if enabled and definition exists
+        definition: wordMasking && card.definition ? maskWord(card.definition, card.word || '') : card.definition
+      }))
 
       if (completeCards.length === 0) {
         toast.error('No valid cards to export', {
@@ -114,6 +127,11 @@ export function ExportDialog({ isOpen, onClose, deckName: defaultDeckName, cardC
           <DialogDescription>
             Export your deck to an Anki package (.apkg) file.
             Only cards with a word, definition, and audio will be exported.
+            {wordMasking && (
+              <p className="mt-2 text-yellow-600 dark:text-yellow-400">
+                ⚠️ Word masking is enabled - definitions will be exported with masked words.
+              </p>
+            )}
           </DialogDescription>
         </DialogHeader>
 

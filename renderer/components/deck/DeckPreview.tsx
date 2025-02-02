@@ -30,6 +30,7 @@ interface DeckPreviewProps {
   onClearDeck: () => void;
   isLoading: boolean;
   autoLowercase?: boolean;
+  wordMasking?: boolean;
 }
 
 export function DeckPreview({ 
@@ -39,7 +40,8 @@ export function DeckPreview({
   onEditCard,
   onClearDeck, 
   isLoading,
-  autoLowercase 
+  autoLowercase,
+  wordMasking 
 }: DeckPreviewProps) {
   const [isAlertOpen, setIsAlertOpen] = useState(false);
 
@@ -100,6 +102,7 @@ export function DeckPreview({
             onEditCard={onEditCard}
             isLoading={isLoading}
             autoLowercase={autoLowercase}
+            wordMasking={wordMasking}
           />
         </div>
       </div>
