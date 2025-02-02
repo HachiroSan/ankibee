@@ -21,7 +21,10 @@
 
 <br/>
 
-Tired of struggling with spelling bee preparation? Frustrated by inconsistent practice methods and scattered resources? AnkiBee is a desktop application designed to streamline spelling bee training through intelligent flashcard creation and comprehensive audio pronunciation practice. Built on top of [Anki](https://apps.ankiweb.net/)'s powerful spaced repetition system, it combines proven memory techniques with specialized spelling bee training features to help teachers and students achieve competition success.
+### Tired of struggling with spelling bee preparation?
+#### Frustrated by inconsistent practice methods and scattered resources?
+
+AnkiBee is a desktop application designed to streamline spelling bee training through intelligent flashcard creation and comprehensive audio pronunciation practice. Built on top of [Anki](https://apps.ankiweb.net/)'s powerful spaced repetition system, it combines proven memory techniques with specialized spelling bee training features to help teachers and students achieve competition success.
 
 <div align="center">
   <img src="https://github.com/HachiroSan/ankibee/blob/27896b87beaf3264ba60f16bf5ae99fa031c82d0/resources/screenshot.png" alt="AnkiBee Screenshot" width="800"/>
