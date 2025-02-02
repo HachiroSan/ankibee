@@ -1,12 +1,9 @@
-# AnkiBee: Master Spelling Bees with Smart Flashcards 🐝
-
 <div align="center">
   <img src="https://github.com/HachiroSan/ankibee/blob/27896b87beaf3264ba60f16bf5ae99fa031c82d0/resources/icon.png" alt="AnkiBee Logo" width="120"/>
-</div>
 
-Tired of struggling with spelling bee preparation? Frustrated by inconsistent practice methods and scattered resources? AnkiBee is a desktop application designed to streamline spelling bee training through intelligent flashcard creation and comprehensive audio pronunciation practice. Built on top of [Anki](https://apps.ankiweb.net/)'s powerful spaced repetition system, it combines proven memory techniques with specialized spelling bee training features to help teachers and students achieve competition success.
+  # AnkiBee
+  ### Master Spelling Bees with Smart Flashcards 🐝
 
-<div align="center">
   <a href="https://github.com/HachiroSan/ankibee/releases/latest">
     <img src="https://img.shields.io/github/v/release/HachiroSan/ankibee?style=flat-square" alt="Latest Release">
   </a>
@@ -14,14 +11,17 @@ Tired of struggling with spelling bee preparation? Frustrated by inconsistent pr
     <img src="https://img.shields.io/github/license/HachiroSan/ankibee?style=flat-square&logo=gnu&label=license&color=blue" alt="License">
   </a>
   <img src="https://img.shields.io/badge/platform-windows-lightgrey?style=flat-square" alt="Platform">
-</div>
 
-<div align="center">
+  <br/>
   <img src="https://img.shields.io/badge/Electron-2B2E3A?style=flat-square&logo=electron&logoColor=white" alt="Electron">
   <img src="https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=nextdotjs&logoColor=white" alt="Next.js">
   <img src="https://img.shields.io/badge/TypeScript-007ACC?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript">
   <img src="https://img.shields.io/badge/Tailwind-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white" alt="Tailwind">
 </div>
+
+<br/>
+
+Tired of struggling with spelling bee preparation? Frustrated by inconsistent practice methods and scattered resources? AnkiBee is a desktop application designed to streamline spelling bee training through intelligent flashcard creation and comprehensive audio pronunciation practice. Built on top of [Anki](https://apps.ankiweb.net/)'s powerful spaced repetition system, it combines proven memory techniques with specialized spelling bee training features to help teachers and students achieve competition success.
 
 <div align="center">
   <img src="https://github.com/HachiroSan/ankibee/blob/27896b87beaf3264ba60f16bf5ae99fa031c82d0/resources/screenshot.png" alt="AnkiBee Screenshot" width="800"/>
