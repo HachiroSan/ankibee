@@ -2,7 +2,7 @@
   <img src="https://github.com/HachiroSan/ankibee/blob/27896b87beaf3264ba60f16bf5ae99fa031c82d0/resources/icon.png" alt="AnkiBee Logo" width="120"/>
 
   # AnkiBee
-  ### Master Spelling Bees with Smart Flashcards 🐝
+  ### Master Spelling Bees with Flashcards 🐝
 
   <a href="https://github.com/HachiroSan/ankibee/releases/latest">
     <img src="https://img.shields.io/github/v/release/HachiroSan/ankibee?style=flat-square" alt="Latest Release">
