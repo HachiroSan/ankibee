@@ -2,7 +2,7 @@
   <img src="https://github.com/HachiroSan/ankibee/blob/27896b87beaf3264ba60f16bf5ae99fa031c82d0/resources/icon.png" alt="AnkiBee Logo" width="120"/>
 
   # AnkiBee
-  ### Master Spelling Bees with Smart Flashcards 🐝
+  ### Master Spelling Bees with Flashcards 🐝
 
   <a href="https://github.com/HachiroSan/ankibee/releases/latest">
     <img src="https://img.shields.io/github/v/release/HachiroSan/ankibee?style=flat-square" alt="Latest Release">
@@ -24,7 +24,7 @@
 ### Tired of struggling with spelling bee preparation?
 #### Frustrated by inconsistent practice methods and scattered resources?
 
-AnkiBee is a desktop application designed to streamline spelling bee training through intelligent flashcard creation and comprehensive audio pronunciation practice. Built on top of [Anki](https://apps.ankiweb.net/)'s powerful spaced repetition system, it combines proven memory techniques with specialized spelling bee training features to help teachers and students achieve competition success.
+AnkiBee is a desktop application designed to streamline spelling bee training through intelligent flashcard creation and comprehensive audio pronunciation practice. Designed to work alongside Anki and its powerful spaced repetition system, this tool combines proven memory techniques with specialized spelling bee training features to help teachers and students achieve competition success.
 
 <div align="center">
   <img src="https://github.com/HachiroSan/ankibee/blob/27896b87beaf3264ba60f16bf5ae99fa031c82d0/resources/screenshot.png" alt="AnkiBee Screenshot" width="800"/>
