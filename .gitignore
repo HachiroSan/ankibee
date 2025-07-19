@@ -42,13 +42,15 @@ next-env.d.ts
 *.swp
 *.swo
 
-# Python
+# Python - exclude cache and temporary files
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-/resources/python/
+# Generated resources folder (created during build)
+/resources/
+# Python installer (downloaded during build)
 /python-installer.exe
 .env
 .venv
@@ -63,3 +65,12 @@ pip-delete-this-directory.txt
 # Logs
 logs
 *.log
+
+# Electron build artifacts
+/out/
+/dist/
+/app/
+
+# Temporary files
+*.tmp
+*.temp
