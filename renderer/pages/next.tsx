@@ -1,7 +1,7 @@
 import React from 'react'
 import Head from 'next/head'
 import Link from 'next/link'
-import Image from 'next/image'
+import { Image } from '@/components/ui/image'
 
 export default function NextPage() {
   return (

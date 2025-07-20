@@ -1,5 +1,5 @@
 import React from 'react'
-import Image from 'next/image'
+import { Image } from "@/components/ui/image"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { FileDown, Trash2 } from "lucide-react"

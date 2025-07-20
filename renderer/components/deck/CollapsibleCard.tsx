@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Play, Trash2, ChevronRight, RefreshCw, AlertCircle, Pencil } from "lucide-react"
 import { WordCard } from '@/types/deck'
 import { loadAudioWaveform, playAudio, wavesurferInstances } from '@/lib/dictionary-service'
+import { audioManager } from '@/lib/audio-manager'
 import { toast } from 'sonner'
 import { cn, maskWord } from '@/lib/utils'
 import { EditCardDialog } from './EditCardDialog'
@@ -31,41 +32,99 @@ export function CollapsibleCard({ card, onRemove, onPlayAudio, onEdit, isLoading
   const [isPlaying, setIsPlaying] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const audioRef = React.useRef<HTMLDivElement>(null);
+  const audioElementRef = React.useRef<HTMLAudioElement | null>(null);
   const instanceId = React.useMemo(() => `card-${card.id}`, [card.id]);
 
-  // Load waveform when card is mounted and has audio
+  // Load waveform only when card is expanded and has audio
   useEffect(() => {
     let mounted = true;
+    let resizeObserver: ResizeObserver | null = null;
 
-    if (card.audioData && audioRef.current) {
+    if (isExpanded && card.audioData && audioRef.current) {
       loadAudioWaveform(card.audioData, audioRef.current, instanceId).catch(error => {
         if (mounted) {
           console.error('Failed to load waveform:', error);
           toast.error('Failed to load audio preview');
         }
       });
+
+      // Add resize observer to handle container size changes
+      resizeObserver = new ResizeObserver(() => {
+        const ws = wavesurferInstances.get(instanceId);
+        if (ws && audioRef.current) {
+          try {
+            const containerWidth = audioRef.current.clientWidth;
+            const duration = ws.getDuration();
+            if (containerWidth > 0 && duration > 0 && duration !== Infinity) {
+              const targetPxPerSec = containerWidth / duration;
+              const zoomLevel = Math.max(targetPxPerSec, 15);
+              ws.zoom(zoomLevel);
+            }
+          } catch (error) {
+            console.warn('Failed to adjust waveform zoom:', error);
+          }
+        }
+      });
+      resizeObserver.observe(audioRef.current);
     }
 
     // Cleanup function
     return () => {
       mounted = false;
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
       const ws = wavesurferInstances.get(instanceId);
       if (ws) {
         ws.destroy();
         wavesurferInstances.delete(instanceId);
       }
     };
-  }, [card.audioData, instanceId]);
+  }, [isExpanded, card.audioData, instanceId]);
+
+  // Cleanup audio when component unmounts
+  useEffect(() => {
+    return () => {
+      // Clean up WaveSurfer instance
+      const ws = wavesurferInstances.get(instanceId);
+      if (ws) {
+        ws.destroy();
+        wavesurferInstances.delete(instanceId);
+      }
+    };
+  }, [instanceId]);
 
   const handlePlayAudio = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!card.audioData) return;
+    if (!card.audioData) {
+      console.warn('No audio data available for card:', card.word);
+      return;
+    }
+
+    // Stop any currently playing audio
+    audioManager.stop();
 
     try {
       setIsPlaying(true);
-      await playAudio(instanceId);
+      console.log('Attempting to play audio for card:', card.word);
+      
+      if (isExpanded) {
+        // Use WaveSurfer for expanded cards (with waveform visualization)
+        const ws = wavesurferInstances.get(instanceId);
+        if (!ws && audioRef.current) {
+          console.log('Loading waveform for audio playback');
+          await loadAudioWaveform(card.audioData, audioRef.current, instanceId);
+        }
+        await playAudio(instanceId);
+      } else {
+        // Use simple HTML5 audio for collapsed cards (faster, no waveform needed)
+        await audioManager.play(card.audioData);
+      }
+      
+      console.log('Successfully played audio for card:', card.word);
       setIsPlaying(false);
     } catch (error) {
+      console.error('Failed to play audio for card:', card.word, 'error:', error);
       setIsPlaying(false);
       toast.error('Failed to play audio');
     }
@@ -84,6 +143,7 @@ export function CollapsibleCard({ card, onRemove, onPlayAudio, onEdit, isLoading
             "gradio-card group hover:shadow-md transition-all duration-200",
             (!card.definition || !card.audioData) && "border-dashed"
           )}>
+            
             <div 
               onClick={() => setIsExpanded(!isExpanded)}
               className="cursor-pointer"
@@ -212,10 +272,15 @@ export function CollapsibleCard({ card, onRemove, onPlayAudio, onEdit, isLoading
                         )}
                       </Button>
                     </div>
-                    <div 
-                      ref={audioRef} 
-                      className={`w-full ${isExpanded ? 'block' : 'hidden'}`} 
-                    />
+                    {isExpanded && (
+                      <div className="w-full overflow-hidden">
+                        <div 
+                          ref={audioRef} 
+                          className="w-full h-8 transition-all duration-200" 
+                          style={{ maxWidth: '100%', minWidth: '100%' }}
+                        />
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

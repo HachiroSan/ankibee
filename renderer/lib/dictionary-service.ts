@@ -48,11 +48,12 @@ function initWaveSurfer(container: HTMLElement, instanceId: string) {
     backend: 'WebAudio',
     normalize: true,
     interact: true,
-    minPxPerSec: 50,
+    minPxPerSec: 15, // Reduced to allow more compression for long audio
     hideScrollbar: true,
     barWidth: 2,
     barGap: 1,
     barRadius: 2,
+    fillParent: true, // Make waveform fill the container width
   });
 
   // Add default event handlers
@@ -178,18 +179,42 @@ export async function fetchAudio(word: string, region: 'us' | 'gb', toastId?: st
 
 export async function loadAudioWaveform(audioData: ArrayBuffer, container: HTMLElement, instanceId: string): Promise<void> {
   try {
+    console.log('Loading audio waveform for instanceId:', instanceId);
     const ws = initWaveSurfer(container, instanceId);
     const blob = new Blob([audioData], { type: 'audio/mp3' });
     
     // Load audio and wait for it to be ready
     await new Promise<void>((resolve, reject) => {
       const onReady = () => {
+        console.log('Audio waveform ready for instanceId:', instanceId);
+        
+        // After the waveform is ready, ensure it fits within the container
+        // Add a small delay to ensure the audio is fully processed
+        setTimeout(() => {
+          try {
+            const containerWidth = container.clientWidth;
+            if (containerWidth > 0) {
+              // Calculate appropriate zoom level to fit the container
+              const duration = ws.getDuration();
+              if (duration > 0 && duration !== Infinity) {
+                const targetPxPerSec = containerWidth / duration;
+                // Ensure we don't go below the minimum pixels per second
+                const zoomLevel = Math.max(targetPxPerSec, 15);
+                ws.zoom(zoomLevel);
+              }
+            }
+          } catch (error) {
+            console.warn('Failed to adjust initial waveform zoom:', error);
+          }
+        }, 100);
+        
         ws.un('ready', onReady);
         ws.un('error', onError);
         resolve();
       };
       
       const onError = (err: Error) => {
+        console.error('Audio waveform error for instanceId:', instanceId, 'error:', err);
         ws.un('ready', onReady);
         ws.un('error', onError);
         reject(err);
@@ -200,20 +225,25 @@ export async function loadAudioWaveform(audioData: ArrayBuffer, container: HTMLE
       ws.loadBlob(blob);
     });
   } catch (error) {
-    console.error('Error loading audio waveform:', error);
+    console.error('Error loading audio waveform for instanceId:', instanceId, 'error:', error);
     throw error;
   }
 }
 
 export async function playAudio(instanceId: string): Promise<void> {
   try {
+    console.log('Attempting to play audio for instanceId:', instanceId);
     const ws = wavesurferInstances.get(instanceId);
     if (!ws) {
+      console.error('No WaveSurfer instance found for instanceId:', instanceId);
+      console.log('Available instances:', Array.from(wavesurferInstances.keys()));
       throw new Error('No audio loaded');
     }
+    console.log('Found WaveSurfer instance, attempting to play');
     await ws.play();
+    console.log('Successfully started audio playback for instanceId:', instanceId);
   } catch (error) {
-    console.error('Error playing audio:', error);
+    console.error('Error playing audio for instanceId:', instanceId, 'error:', error);
     toast.error('Failed to play audio', {
       description: error instanceof Error ? error.message : 'Unknown error occurred'
     });

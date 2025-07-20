@@ -9,4 +9,6 @@ module.exports = {
   webpack: (config) => {
     return config
   },
+  // Suppress React warnings about fetchPriority
+  reactStrictMode: false,
 }
