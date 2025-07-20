@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from 'react'
-import Head from 'next/head'
-import { WordCard, AudioSource } from '@/types/deck'
-import { toast } from 'sonner'
-import { DeckHeader } from '@/components/deck/DeckHeader'
-import { AddCardForm } from '@/components/deck/AddCardForm'
-import { DeckPreview } from '@/components/deck/DeckPreview'
-import { fetchAudio } from '@/lib/dictionary-service'
-import WaveSurfer from 'wavesurfer.js'
-import { BatchAddForm } from '@/components/deck/BatchAddForm'
+import React, { useEffect, useState, useRef } from 'react';
+import Head from 'next/head';
+import { WordCard, AudioSource } from '@/types/deck';
+import { AddCardForm } from '@/components/deck/AddCardForm';
+import { DeckPreview } from '@/components/deck/DeckPreview';
+import { DeckHeader } from '@/components/deck/DeckHeader';
+import { UpdateNotification } from '@/components/UpdateNotification';
+import { toast } from 'sonner';
+import { isDuplicateWord } from '@/lib/utils';
+import WaveSurfer from 'wavesurfer.js';
+import { BatchAddForm } from '@/components/deck/BatchAddForm';
 
 interface HomePageProps {
   autoLowercase?: boolean;
@@ -152,7 +153,7 @@ export default function HomePage({ autoLowercase = true }: HomePageProps) {
     
     try {
       // Check for duplicates
-      const isDuplicate = cards.some(card => card.word.toLowerCase() === wordToStore.toLowerCase());
+      const isDuplicate = isDuplicateWord(wordToStore, cards, isAutoLowercase);
       if (isDuplicate) {
         toast.error('Duplicate Word', {
           description: `"${wordToStore}" already exists in your deck`
@@ -168,7 +169,7 @@ export default function HomePage({ autoLowercase = true }: HomePageProps) {
         audioData = await audioFile.arrayBuffer();
       } else if (audioSource === 'google-us' || audioSource === 'google-uk') {
         region = audioSource === 'google-us' ? 'us' : 'gb';
-        const fetchedAudio = await fetchAudio(wordToStore, region);
+        const fetchedAudio = await window.electron.fetchAudio(wordToStore, region);
         audioData = fetchedAudio || undefined;
       }
 
@@ -244,23 +245,52 @@ export default function HomePage({ autoLowercase = true }: HomePageProps) {
   const handleBatchAdd = async (words: Array<{ word: string, definition?: string, audioData?: ArrayBuffer, audioSource?: AudioSource }>) => {
     try {
       const timestamp = Date.now();
-      for (const { word, definition, audioData, audioSource } of words) {
-        // Check for duplicates
-        const isDuplicate = cards.some(card => card.word.toLowerCase() === word.toLowerCase());
-        if (isDuplicate) {
-          console.log(`Skipped "${word}": Already exists in deck`);
-          continue;
+      
+      // Use functional state update to ensure we're working with the latest state
+      setCards(currentCards => {
+        const processedWords = new Set<string>();
+        const newCards: WordCard[] = [];
+        
+        // Pre-populate processed words with existing cards
+        currentCards.forEach(card => {
+          processedWords.add(card.word.toLowerCase());
+        });
+        
+        // Process each word and check for duplicates
+        for (const { word, definition, audioData, audioSource } of words) {
+          const wordToCheck = word.toLowerCase();
+          
+          // Check for duplicates against existing cards and already processed words in this batch
+          if (processedWords.has(wordToCheck)) {
+            console.log(`Skipped "${word}": Already exists in deck or batch`);
+            continue;
+          }
+          
+          // Mark this word as processed
+          processedWords.add(wordToCheck);
+          
+          // Add the new card
+          newCards.push({
+            id: String(Date.now() + Math.random()),
+            word,
+            definition: definition || '',
+            audioData,
+            audioRegion: audioSource === 'google-us' ? 'us' : audioSource === 'google-uk' ? 'gb' : undefined,
+            createdAt: timestamp,
+            updatedAt: timestamp
+          });
         }
-
-        setCards(currentCards => [...currentCards, {
-          id: String(Date.now() + Math.random()),
-          word,
-          definition: definition || '',
-          audioData,
-          audioRegion: audioSource === 'google-us' ? 'us' : audioSource === 'google-uk' ? 'gb' : undefined,
-          createdAt: timestamp,
-          updatedAt: timestamp
-        }]);
+        
+        // Return the updated cards array
+        return [...currentCards, ...newCards];
+      });
+      
+      // Show success message if any cards were added
+      const addedCount = words.length;
+      if (addedCount > 0) {
+        toast.success('Batch Add Complete', {
+          description: `Added ${addedCount} card${addedCount > 1 ? 's' : ''} to your deck`
+        });
       }
     } catch (error) {
       console.error('Error in batch add:', error);
@@ -324,6 +354,7 @@ export default function HomePage({ autoLowercase = true }: HomePageProps) {
           onThemeChange={handleThemeChange}
           onAutoLowercaseChange={handleAutoLowercaseChange}
           onWordMaskingChange={handleWordMaskingChange}
+          onCardsChange={setCards}
         />
       </div>
 

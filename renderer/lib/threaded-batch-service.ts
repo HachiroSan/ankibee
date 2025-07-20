@@ -172,15 +172,26 @@ async function processBatch(
     duplicates: 0
   };
 
+  // Pre-process words to remove duplicates and normalize
+  const uniqueWords = new Map<string, string>();
+  for (const word of words) {
+    const normalizedWord = word.trim().toLowerCase();
+    if (normalizedWord && !uniqueWords.has(normalizedWord)) {
+      uniqueWords.set(normalizedWord, word.trim());
+    }
+  }
+
+  const deduplicatedWords = Array.from(uniqueWords.values());
+  
   // Process words in chunks to control concurrency
-  for (let i = 0; i < words.length; i += maxConcurrent) {
-    const chunk = words.slice(i, i + maxConcurrent);
+  for (let i = 0; i < deduplicatedWords.length; i += maxConcurrent) {
+    const chunk = deduplicatedWords.slice(i, i + maxConcurrent);
     
     // Process chunk concurrently
     const chunkPromises = chunk.map(async (word) => {
       const wordToProcess = word.trim().toLowerCase();
       
-      // Check for duplicates within the batch
+      // Double-check for duplicates within the batch (defensive programming)
       if (processedWords.has(wordToProcess)) {
         stats.duplicates++;
         return {
@@ -190,6 +201,7 @@ async function processBatch(
         };
       }
       
+      // Mark as processed immediately to prevent race conditions
       processedWords.add(wordToProcess);
       
       const result = await processWord(word, audioSource, skipNoDefinition, skipNoAudio);
@@ -206,7 +218,7 @@ async function processBatch(
       // Update progress
       processedCount++;
       if (onProgress) {
-        onProgress(processedCount, words.length, word, { ...stats });
+        onProgress(processedCount, deduplicatedWords.length, word, { ...stats });
       }
       
       return result;

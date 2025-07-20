@@ -1,16 +1,18 @@
-import React, { useState } from 'react'
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
-import { Label } from "@/components/ui/label"
-import { ListPlus, RefreshCw, AlertCircle, Settings } from "lucide-react"
-import { FcGoogle } from "react-icons/fc"
-import { AudioSource } from '@/types/deck'
-import { toast } from 'sonner'
-import { WordCard } from '@/types/deck'
-import { processWordsWithThreading, getOptimalConcurrency, BatchProcessingResult, ProgressStats } from '@/lib/threaded-batch-service'
-import { BatchProgress } from './BatchProgress'
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Progress } from '@/components/ui/progress';
+import { AlertCircle, Settings, Play, Pause, RefreshCw, ListPlus } from 'lucide-react';
+import { FcGoogle } from 'react-icons/fc';
+import { AudioSource, WordCard } from '@/types/deck';
+import { processWordsWithThreading, BatchProcessingResult, ProgressStats } from '@/lib/threaded-batch-service';
+import { getOptimalConcurrency } from '@/lib/threaded-batch-service';
+import { toast } from 'sonner';
+import { removeDuplicateWords, findDuplicateWords } from '@/lib/utils';
+import { BatchProgress } from './BatchProgress';
 
 interface BatchAddFormProps {
   onSubmit: (words: Array<{ word: string, definition?: string, audioData?: ArrayBuffer, audioSource?: AudioSource }>) => void;
@@ -48,21 +50,51 @@ export function BatchAddForm({ onSubmit, isLoading, autoLowercase, existingCards
 
     setIsProcessing(true);
     const wordList = words.split('\n').filter(w => w.trim());
+    
+    // First, remove duplicates within the input itself
+    const uniqueWords = removeDuplicateWords(wordList, autoLowercase);
+    const inputDuplicates = findDuplicateWords(wordList, autoLowercase);
+    
+    if (inputDuplicates.length > 0) {
+      console.log(`Found ${inputDuplicates.length} duplicate(s) in input:`, inputDuplicates);
+      toast.info(`Removed ${inputDuplicates.length} duplicate${inputDuplicates.length > 1 ? 's' : ''} from input`);
+    }
+    
     const processedWords = new Set<string>(); // Track processed words
+    const duplicateWords: string[] = []; // Track duplicates for better feedback
 
     // Pre-populate processedWords with existing cards
     existingCards.forEach(card => processedWords.add(card.word.toLowerCase()));
 
-    // Filter out existing words from the batch
-    const newWords = wordList.filter(word => {
+    // Filter out existing words from the batch and track duplicates
+    const newWords = uniqueWords.filter(word => {
       const wordToProcess = autoLowercase === true ? word.trim().toLowerCase() : word.trim();
-      return !processedWords.has(wordToProcess.toLowerCase());
+      const normalizedWord = wordToProcess.toLowerCase();
+      
+      if (processedWords.has(normalizedWord)) {
+        duplicateWords.push(word.trim());
+        return false;
+      }
+      
+      processedWords.add(normalizedWord);
+      return true;
     });
 
     if (newWords.length === 0) {
-      toast.error('All words already exist in the deck');
+      const message = duplicateWords.length > 0 
+        ? `All ${duplicateWords.length} word${duplicateWords.length > 1 ? 's' : ''} already exist in the deck`
+        : 'No valid words to process';
+      toast.error(message);
       setIsProcessing(false);
       return;
+    }
+
+    // Show info about duplicates if any were found
+    if (duplicateWords.length > 0) {
+      console.log(`Found ${duplicateWords.length} duplicate(s):`, duplicateWords);
+      toast.info(`Skipped ${duplicateWords.length} duplicate${duplicateWords.length > 1 ? 's' : ''}`, {
+        description: `Processing ${newWords.length} new word${newWords.length > 1 ? 's' : ''}`
+      });
     }
 
     // Reset progress state
@@ -77,9 +109,7 @@ export function BatchAddForm({ onSubmit, isLoading, autoLowercase, existingCards
     });
 
     // Create a progress toast that we'll update
-    const progressToastId = toast.loading('Starting threaded batch processing...', {
-      duration: Infinity // Keep it visible until we dismiss it
-    });
+    const progressToastId = toast.loading(`Starting threaded batch processing with ${maxConcurrent} workers...`);
 
     try {
       const result: BatchProcessingResult = await processWordsWithThreading({
@@ -100,13 +130,9 @@ export function BatchAddForm({ onSubmit, isLoading, autoLowercase, existingCards
             duplicates: stats.duplicates
           }));
 
-          toast.loading(
-            `Processing "${currentWord}"`, 
-            { 
-              id: progressToastId,
-              description: `Word ${processed} of ${total} (${Math.round((processed / total) * 100)}%)`
-            }
-          );
+          toast.message(`Word ${processed} of ${total} (${Math.round((processed / total) * 100)}%)`, {
+            id: progressToastId,
+          });
         }
       });
 
@@ -126,10 +152,7 @@ export function BatchAddForm({ onSubmit, isLoading, autoLowercase, existingCards
       }
 
       if (result.results.length > 0) {
-        toast.success('Threaded Batch Processing Complete', {
-          description: summaryParts.join(', '),
-          duration: 4000
-        });
+        toast.success(summaryParts.join(', '));
 
         // Convert results to the expected format
         const formattedResults = result.results.map(r => ({
@@ -142,9 +165,7 @@ export function BatchAddForm({ onSubmit, isLoading, autoLowercase, existingCards
         onSubmit(formattedResults);
         setWords('');
       } else {
-        toast.error('No cards were added', {
-          description: 'All words were skipped due to missing requirements'
-        });
+        toast.error('No cards were added. All words were skipped due to missing requirements.');
       }
 
       // Show errors if any
@@ -153,19 +174,14 @@ export function BatchAddForm({ onSubmit, isLoading, autoLowercase, existingCards
         // Show a summary of errors
         const errorCount = result.errors.length;
         if (errorCount > 0) {
-          toast.error(`Processing completed with ${errorCount} error${errorCount > 1 ? 's' : ''}`, {
-            description: 'Check console for details',
-            duration: 5000
-          });
+          toast.error(`Processing completed with ${errorCount} error${errorCount > 1 ? 's' : ''}`);
         }
       }
 
     } catch (error) {
       // Dismiss the progress toast in case of overall failure
       toast.dismiss(progressToastId);
-      toast.error('Failed to process words', {
-        description: error instanceof Error ? error.message : 'An unexpected error occurred'
-      });
+      toast.error(error instanceof Error ? error.message : 'An unexpected error occurred');
     } finally {
       setIsProcessing(false);
     }

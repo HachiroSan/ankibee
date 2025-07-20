@@ -2,11 +2,12 @@ import React from 'react'
 import Image from 'next/image'
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { FileDown } from "lucide-react"
+import { FileDown, Trash2 } from "lucide-react"
 import { WordCard } from '@/types/deck'
 import { toast } from 'sonner'
 import { ExportDialog } from './ExportDialog'
 import { SettingsDialog } from '@/components/ui/settings-dialog'
+import { findDuplicateCards, removeDuplicateCards } from '@/lib/utils'
 import {
   Tooltip,
   TooltipContent,
@@ -24,6 +25,7 @@ interface DeckHeaderProps {
   onThemeChange: (theme: 'light' | 'dark' | 'system') => void;
   onAutoLowercaseChange: (enabled: boolean) => void;
   onWordMaskingChange: (enabled: boolean) => void;
+  onCardsChange: (cards: WordCard[]) => void;
 }
 
 export function DeckHeader({ 
@@ -35,9 +37,28 @@ export function DeckHeader({
   wordMasking,
   onThemeChange,
   onAutoLowercaseChange,
-  onWordMaskingChange
+  onWordMaskingChange,
+  onCardsChange
 }: DeckHeaderProps) {
   const [isExportDialogOpen, setIsExportDialogOpen] = React.useState(false)
+
+  const handleCleanupDuplicates = () => {
+    const duplicates = findDuplicateCards(cards, autoLowercase);
+    
+    if (duplicates.length === 0) {
+      toast.info('No duplicates found in your deck');
+      return;
+    }
+    
+    const cleanedCards = removeDuplicateCards(cards, autoLowercase);
+    const removedCount = cards.length - cleanedCards.length;
+    
+    onCardsChange(cleanedCards);
+    
+    toast.success(`Cleaned up ${removedCount} duplicate${removedCount > 1 ? 's' : ''}`, {
+      description: `Removed ${duplicates.map(c => `"${c.word}"`).join(', ')}`
+    });
+  };
 
   return (
     <TooltipProvider>
@@ -72,6 +93,24 @@ export function DeckHeader({
             </TooltipTrigger>
             <TooltipContent>
               <p>Configure application settings</p>
+            </TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                onClick={handleCleanupDuplicates}
+                disabled={isLoading || cardsCount === 0}
+                className="gradio-button"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">Clean Duplicates</span>
+                <span className="sm:hidden">Clean</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Remove duplicate cards from your deck</p>
             </TooltipContent>
           </Tooltip>
 
