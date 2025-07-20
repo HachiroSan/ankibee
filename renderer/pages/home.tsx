@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { isDuplicateWord } from '@/lib/utils';
 import WaveSurfer from 'wavesurfer.js';
 import { BatchAddForm } from '@/components/deck/BatchAddForm';
+import { getAppTitle, getVersionString } from '@/lib/version';
 
 interface HomePageProps {
   autoLowercase?: boolean;
@@ -388,6 +389,14 @@ export default function HomePage({ autoLowercase = true }: HomePageProps) {
               />
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Version Footer */}
+      <div className="flex-none px-6 py-2 border-t border-border/20">
+        <div className="flex items-center justify-between text-xs text-muted-foreground/60">
+          <span>{getAppTitle()}</span>
+          <span>{getVersionString()}</span>
         </div>
       </div>
     </div>

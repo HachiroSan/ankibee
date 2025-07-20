@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
+import { versionInfo, getVersionString } from '@/lib/version'
 
 type Theme = 'light' | 'dark' | 'system'
 
@@ -231,6 +232,42 @@ export function SettingsDialog({
               </div>
             </div>
           </div>
+
+          {/* About Section */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-medium leading-none">About</h3>
+              <Separator className="flex-1" />
+            </div>
+            
+            <div className="space-y-4 pl-1">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <p className="text-sm">Version</p>
+                    <p className="text-[0.8rem] text-muted-foreground">
+                      Current application version
+                    </p>
+                  </div>
+                  <div className="text-sm font-mono text-muted-foreground">
+                    {getVersionString()}
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <p className="text-sm">Build</p>
+                    <p className="text-[0.8rem] text-muted-foreground">
+                      Build information
+                    </p>
+                  </div>
+                  <div className="text-sm font-mono text-muted-foreground">
+                    {versionInfo.platform}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="flex items-center justify-center gap-1 text-[10px] text-muted-foreground/60 mt-2">
@@ -243,6 +280,8 @@ export function SettingsDialog({
           >
             Hachiro
           </a>
+          <span className="mx-1">•</span>
+          <span>{getVersionString()}</span>
         </div>
       </DialogContent>
     </Dialog>
