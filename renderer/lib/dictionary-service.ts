@@ -73,6 +73,36 @@ function initWaveSurfer(container: HTMLElement, instanceId: string) {
   return ws;
 }
 
+// Helper function to safely convert Buffer to ArrayBuffer
+function bufferToArrayBuffer(buffer: any): ArrayBuffer | null {
+  try {
+    if (!buffer) return null;
+    
+    // If it's already an ArrayBuffer, return it
+    if (buffer instanceof ArrayBuffer) {
+      return buffer;
+    }
+    
+    // If it's a Buffer (Node.js), convert it properly
+    if (buffer.buffer && buffer.byteLength !== undefined) {
+      // This is a Uint8Array or similar TypedArray
+      return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
+    }
+    
+    // Try the Object.values approach as fallback
+    if (typeof buffer === 'object' && buffer !== null) {
+      const uint8Array = new Uint8Array(Object.values(buffer));
+      return uint8Array.buffer;
+    }
+    
+    console.warn('Unknown buffer type:', typeof buffer, buffer);
+    return null;
+  } catch (error) {
+    console.error('Error converting buffer to ArrayBuffer:', error);
+    return null;
+  }
+}
+
 export async function fetchWordDefinition(word: string, toastId?: string): Promise<string | null> {
   const normalizedWord = word.trim().toLowerCase();
   if (!normalizedWord) {
@@ -120,8 +150,19 @@ export async function fetchAudio(word: string, region: 'us' | 'gb', toastId?: st
     if (toastId) {
       toast.success(`Found ${region === 'us' ? 'American' : 'British'} pronunciation for "${word}"`, { id: toastId });
     }
-    // Convert Buffer to ArrayBuffer
-    return new Uint8Array(Object.values(buffer)).buffer;
+    // Convert Buffer to ArrayBuffer using the robust conversion method
+    const convertedBuffer = bufferToArrayBuffer(buffer);
+    if (!convertedBuffer) {
+      console.error('Failed to convert audio buffer for word:', word);
+      const errorMessage = `Sorry, I couldn't process the audio for "${word}".`;
+      if (toastId) {
+        toast.error(errorMessage, { id: toastId });
+      } else {
+        toast.error(errorMessage);
+      }
+      return null;
+    }
+    return convertedBuffer;
   } catch (error) {
     console.error('Error in fetchAudio:', error);
     // Always show a user-friendly message, regardless of the actual error
