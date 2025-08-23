@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Plus, Trash2, Music, Sparkles, Play, RefreshCw, ListPlus } from "lucide-react"
 import { FcGoogle } from "react-icons/fc"
 import { BsStars } from "react-icons/bs"
@@ -27,6 +28,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { WordCard } from '@/types/deck'
+import { fetchMalayDefinitions, MalayDefinition } from '@/lib/malay-dictionary';
+import { DefinitionInput } from './form/DefinitionInput';
+
 
 interface AddCardFormProps {
   onSubmit: (word: string, definition: string, audioFile: File | undefined, audioSource: AudioSource) => void;
@@ -82,6 +86,7 @@ export function AddCardForm({ onSubmit, onBatchSubmit, isLoading: formIsLoading,
   const [currentWord, setCurrentWord] = useState('');
   const [currentDefinition, setCurrentDefinition] = useState('');
   const [currentAudio, setCurrentAudio] = useState<File | undefined>(undefined);
+
   const [audioSource, setAudioSource] = useState<AudioSource>('google-us');
   const [audioPreview, setAudioPreview] = useState<AudioPreview | null>(null);
   const [isFetching, setIsFetching] = useState(false);
@@ -90,6 +95,11 @@ export function AddCardForm({ onSubmit, onBatchSubmit, isLoading: formIsLoading,
   const audioRef = React.useRef<HTMLDivElement>(null);
   const instanceId = React.useMemo(() => 'add-card-form', []);
   const [isBatchMode, setIsBatchMode] = useState(false);
+  const [malayDefinitions, setMalayDefinitions] = useState<MalayDefinition[]>([]);
+  const [isMalayFetching, setIsMalayFetching] = useState(false);
+  const [selectedMalayIndex, setSelectedMalayIndex] = useState<number | null>(null);
+  const [definitionSource, setDefinitionSource] = useState<'english' | 'malay'>('english');
+  const [showMalayDialog, setShowMalayDialog] = useState(false);
 
   // Effect to load waveform when audio preview changes
   React.useEffect(() => {
@@ -151,20 +161,41 @@ export function AddCardForm({ onSubmit, onBatchSubmit, isLoading: formIsLoading,
     const toastId = `fetch-definition-${Date.now()}`;
 
     try {
-      toast.loading(`Finding definition for "${wordToStore}"...`, {
-        id: toastId
-      });
-      
-      const definition = await fetchWordDefinition(wordToStore);
-      if (definition) {
-        setCurrentDefinition(definition);
-        toast.success(`Found definition for "${wordToStore}"`, {
+      if (definitionSource === 'english') {
+        toast.loading(`Finding English definition for "${wordToStore}"...`, {
           id: toastId
         });
-      } else {
-        toast.error(`No definition found for "${wordToStore}"`, {
+        
+        const definition = await fetchWordDefinition(wordToStore);
+        if (definition) {
+          setCurrentDefinition(definition);
+          toast.success(`Found English definition for "${wordToStore}"`, {
+            id: toastId
+          });
+        } else {
+          toast.error(`No English definition found for "${wordToStore}"`, {
+            id: toastId
+          });
+        }
+      } else if (definitionSource === 'malay') {
+        toast.loading(`Finding Malay definition for "${wordToStore}"...`, {
           id: toastId
         });
+        
+        const defs = await fetchMalayDefinitions(wordToStore);
+        if (defs.length > 0) {
+          setMalayDefinitions(defs);
+          setSelectedMalayIndex(null);
+          // Open Malay definitions dialog
+          setShowMalayDialog(true);
+          toast.success(`Found ${defs.length} Malay definition(s)`, {
+            id: toastId
+          });
+        } else {
+          toast.error(`No Malay definitions found for "${wordToStore}"`, {
+            id: toastId
+          });
+        }
       }
     } catch (error) {
       console.error('Error in handleFetchDefinition:', error);
@@ -295,6 +326,8 @@ export function AddCardForm({ onSubmit, onBatchSubmit, isLoading: formIsLoading,
     }
   };
 
+
+
   const renderAudioSourceIcon = (source: AudioSource) => {
     switch (source) {
       case 'google-us':
@@ -382,72 +415,19 @@ export function AddCardForm({ onSubmit, onBatchSubmit, isLoading: formIsLoading,
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-medium">Definition</label>
-                  <div className="relative group">
-                    <Textarea
-                      placeholder="Enter definition..."
-                      value={currentDefinition}
-                      onChange={(e) => setCurrentDefinition(e.target.value)}
-                      disabled={formIsLoading}
-                      className="gradio-input min-h-[80px] text-sm pr-20 transition-all duration-200 focus:shadow-[0_0_0_1px_rgba(255,136,0,0.1),0_0_0_4px_rgba(255,136,0,0.1)]"
-                    />
-                    <div className="absolute right-2 top-2 flex gap-1">
-                      {isFetching ? (
-                        <motion.div
-                          key="loading"
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ duration: 0.15 }}
-                        >
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                disabled={true}
-                                className="h-5 px-2 text-[11px] font-normal text-muted-foreground/40 hover:text-muted-foreground/40 hover:bg-transparent cursor-not-allowed"
-                              >
-                                <LoadingSparkles />
-                                <span>Fetching</span>
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Fetching definition from dictionary</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </motion.div>
-                      ) : (
-                        <motion.div
-                          key="button"
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ duration: 0.15 }}
-                        >
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={handleFetchDefinition}
-                                disabled={formIsLoading || !currentWord || isFetching}
-                                className={`h-5 px-2 text-[11px] font-normal transition-colors relative overflow-hidden
-                                  ${!currentWord ? 'text-muted-foreground/40 hover:text-muted-foreground/40 hover:bg-transparent cursor-not-allowed' : 
-                                    'text-muted-foreground hover:text-primary hover:bg-primary/5'}`}
-                              >
-                                <BsStars className="h-3 w-3" />
-                                <span>Fetch</span>
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Automatically fetch definition from dictionary</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </motion.div>
-                      )}
-                    </div>
-                  </div>
+                  <DefinitionInput
+                    value={currentDefinition}
+                    onChange={setCurrentDefinition}
+                    onFetchDefinition={handleFetchDefinition}
+                    isLoading={formIsLoading}
+                    isDefinitionFetching={isFetching}
+                    currentWord={currentWord}
+                    disabled={formIsLoading}
+                    definitionSource={definitionSource}
+                    onDefinitionSourceChange={setDefinitionSource}
+                  />
                 </div>
+
                 <div className="space-y-2">
                   <label className="text-xs font-medium">Audio Source</label>
                   <div className="space-y-2">
@@ -645,6 +625,8 @@ export function AddCardForm({ onSubmit, onBatchSubmit, isLoading: formIsLoading,
                   </div>
                 </div>
 
+
+
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
@@ -665,6 +647,79 @@ export function AddCardForm({ onSubmit, onBatchSubmit, isLoading: formIsLoading,
           )}
         </CardContent>
       </Card>
+
+      {/* Malay Definitions Selection Dialog */}
+      <Dialog open={showMalayDialog} onOpenChange={setShowMalayDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Select Malay Definition</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Found {malayDefinitions.length} Malay definition(s) for "{currentWord}":
+            </p>
+            <div className="space-y-2 max-h-60 overflow-y-auto">
+              {/* No definition option */}
+              <div
+                className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                  selectedMalayIndex === null
+                    ? 'border-primary bg-primary/5'
+                    : 'border-border hover:border-primary/50 hover:bg-muted/30'
+                }`}
+                onClick={() => {
+                  setSelectedMalayIndex(null);
+                  setCurrentDefinition('');
+                  setShowMalayDialog(false);
+                }}
+              >
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-muted-foreground">No definition selected</p>
+                  <p className="text-xs text-muted-foreground">Leave definition empty</p>
+                </div>
+              </div>
+              
+              {/* Malay definitions */}
+              {malayDefinitions.map((def, idx) => (
+                <div
+                  key={idx}
+                  className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                    selectedMalayIndex === idx
+                      ? 'border-primary bg-primary/5'
+                      : 'border-border hover:border-primary/50 hover:bg-muted/30'
+                  }`}
+                  onClick={() => {
+                    setSelectedMalayIndex(idx);
+                    setCurrentDefinition(def.malayDefinition);
+                    setShowMalayDialog(false);
+                  }}
+                >
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium">{def.malayDefinition}</p>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      {def.source && (
+                        <span className="px-2 py-0.5 bg-muted rounded text-[10px]">
+                          {def.source}
+                        </span>
+                      )}
+                      {def.phonetic && (
+                        <span>[{def.phonetic}]</span>
+                      )}
+                      {def.jawi && (
+                        <span className="font-mono">Jawi: {def.jawi}</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setShowMalayDialog(false)}>
+              Cancel
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </TooltipProvider>
   );
 } 

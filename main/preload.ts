@@ -32,6 +32,7 @@ contextBridge.exposeInMainWorld('electron', {
   // Dictionary methods
   fetchWordDefinition: (word: string) => ipcRenderer.invoke('dictionary:fetch-definition', word),
   fetchAudio: (word: string, region: 'us' | 'gb') => ipcRenderer.invoke('dictionary:fetch-audio', word, region),
+  fetchMalayDefinitions: (word: string) => ipcRenderer.invoke('malay:fetch-definitions', word),
 
   // Audio cache methods
   checkAudioExists: (key: string) => ipcRenderer.invoke('audio:check-exists', key),

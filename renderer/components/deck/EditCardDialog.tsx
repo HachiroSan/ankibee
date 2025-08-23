@@ -5,9 +5,11 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { WordCard, AudioSource } from '@/types/deck'
-import { Music, RefreshCw, Play, Trash2 } from "lucide-react"
+import { Music, RefreshCw, Play, Trash2, Sparkles } from "lucide-react"
 import { FcGoogle } from "react-icons/fc"
 import { fetchAudio, loadAudioWaveform, playAudio } from '@/lib/dictionary-service'
+import { fetchWordDefinition } from '@/lib/dictionary-service'
+import { fetchMalayDefinitions } from '@/lib/malay-dictionary'
 import { toast } from 'sonner'
 import {
   Tooltip,
@@ -15,6 +17,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { DefinitionInput } from './form/DefinitionInput';
 
 interface EditCardDialogProps {
   card: WordCard;
@@ -40,6 +43,12 @@ export function EditCardDialog({ card, isOpen, onClose, onSave, isLoading, autoL
   const [audioData, setAudioData] = useState<ArrayBuffer | undefined>(card.audioData);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
+  const [isMalayFetching, setIsMalayFetching] = useState(false);
+  const [malayDefinitions, setMalayDefinitions] = useState<any[]>([]);
+  const [isMalayDialogOpen, setIsMalayDialogOpen] = useState(false);
+  const [selectedMalayIndex, setSelectedMalayIndex] = useState<number | null>(null);
+  const [definitionSource, setDefinitionSource] = useState<'english' | 'malay'>('english');
   const audioRef = React.useRef<HTMLDivElement>(null);
   const instanceId = React.useMemo(() => 'edit-card-dialog', []);
 
@@ -49,6 +58,62 @@ export function EditCardDialog({ card, isOpen, onClose, onSave, isLoading, autoL
       loadAudioWaveform(audioData, audioRef.current, instanceId).catch(console.error);
     }
   }, [audioData, instanceId]);
+
+  const handleFetchDefinition = async () => {
+    if (!word.trim()) {
+      toast.error('Please enter a word first');
+      return;
+    }
+
+    setIsFetching(true);
+    const wordToProcess = autoLowercase === true ? word.toLowerCase() : word;
+    const toastId = `fetch-definition-${Date.now()}`;
+
+    try {
+      if (definitionSource === 'english') {
+        toast.loading(`Finding English definition for "${wordToProcess}"...`, {
+          id: toastId
+        });
+        
+        const definition = await fetchWordDefinition(wordToProcess, toastId);
+        if (definition) {
+          setDefinition(definition);
+          toast.success(`Found English definition for "${wordToProcess}"`, {
+            id: toastId
+          });
+        } else {
+          toast.error(`No English definition found for "${wordToProcess}"`, {
+            id: toastId
+          });
+        }
+      } else if (definitionSource === 'malay') {
+        toast.loading(`Finding Malay definition for "${wordToProcess}"...`, {
+          id: toastId
+        });
+        
+        const defs = await fetchMalayDefinitions(wordToProcess);
+        if (defs.length > 0) {
+          setMalayDefinitions(defs);
+          setSelectedMalayIndex(null);
+          setIsMalayDialogOpen(true);
+          toast.success(`Found ${defs.length} Malay definition(s)`, {
+            id: toastId
+          });
+        } else {
+          toast.error(`No Malay definitions found for "${wordToProcess}"`, {
+            id: toastId
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error in handleFetchDefinition:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to fetch definition', {
+        id: toastId
+      });
+    } finally {
+      setIsFetching(false);
+    }
+  };
 
   const handleFetchAudio = async () => {
     if (!word.trim()) {
@@ -132,6 +197,12 @@ export function EditCardDialog({ card, isOpen, onClose, onSave, isLoading, autoL
     onClose();
   };
 
+  const handleMalayDefinitionSelect = (index: number) => {
+    setSelectedMalayIndex(index);
+    setDefinition(malayDefinitions[index].malayDefinition);
+    setIsMalayDialogOpen(false);
+  };
+
   return (
     <TooltipProvider>
       <Dialog open={isOpen} onOpenChange={onClose}>
@@ -166,12 +237,62 @@ export function EditCardDialog({ card, isOpen, onClose, onSave, isLoading, autoL
                   <p>The meaning or explanation of the word</p>
                 </TooltipContent>
               </Tooltip>
-              <Textarea
-                value={definition}
-                onChange={(e) => setDefinition(e.target.value)}
-                className="min-h-[100px]"
-                disabled={isLoading}
-              />
+              <div className="relative">
+                <Textarea
+                  value={definition}
+                  onChange={(e) => setDefinition(e.target.value)}
+                  className="min-h-[100px] pr-20"
+                  disabled={isLoading}
+                />
+                <div className="absolute right-2 top-2 flex gap-1">
+                  <Select
+                    value={definitionSource}
+                    onValueChange={(value: 'english' | 'malay') => setDefinitionSource(value)}
+                    disabled={isLoading}
+                  >
+                    <SelectTrigger className="h-6 w-16 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="english">EN</SelectItem>
+                      <SelectItem value="malay">MY</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {isFetching ? (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      disabled={true}
+                      className="h-6 px-2 text-xs font-normal text-muted-foreground/40 hover:text-muted-foreground/40 hover:bg-transparent cursor-not-allowed"
+                    >
+                      <RefreshCw className="h-3 w-3 animate-spin" />
+                    </Button>
+                  ) : (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleFetchDefinition}
+                          disabled={isLoading || !word || isFetching}
+                          className="h-6 px-2 text-xs font-normal text-muted-foreground hover:text-primary hover:bg-primary/5"
+                        >
+                          {definitionSource === 'english' ? (
+                            <Sparkles className="h-3 w-3" />
+                          ) : (
+                            <Sparkles className="h-3 w-3" />
+                          )}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Automatically fetch definition from {definitionSource === 'english' ? 'English' : 'Malay'} dictionary</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+                </div>
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -400,6 +521,55 @@ export function EditCardDialog({ card, isOpen, onClose, onSave, isLoading, autoL
                 <p>Save changes to this card</p>
               </TooltipContent>
             </Tooltip>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Malay Definitions Selection Dialog */}
+      <Dialog open={isMalayDialogOpen} onOpenChange={setIsMalayDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Select Malay Definition</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              Found {malayDefinitions.length} Malay definition(s) for "{word}":
+            </p>
+            <div className="space-y-2 max-h-60 overflow-y-auto">
+              {malayDefinitions.map((def, idx) => (
+                <div
+                  key={idx}
+                  className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                    selectedMalayIndex === idx
+                      ? 'border-primary bg-primary/5'
+                      : 'border-border hover:border-primary/50 hover:bg-muted/30'
+                  }`}
+                  onClick={() => handleMalayDefinitionSelect(idx)}
+                >
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium">{def.malayDefinition}</p>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      {def.source && (
+                        <span className="px-2 py-0.5 bg-muted rounded text-[10px]">
+                          {def.source}
+                        </span>
+                      )}
+                      {def.phonetic && (
+                        <span>[{def.phonetic}]</span>
+                      )}
+                      {def.jawi && (
+                        <span className="font-mono">Jawi: {def.jawi}</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setIsMalayDialogOpen(false)}>
+              Cancel
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

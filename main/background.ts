@@ -8,6 +8,11 @@ import { ankiExportService } from './services/anki-export'
 import { storageService } from './services/storage-service'
 import { autoUpdater } from 'electron-updater'
 import fs from 'fs/promises'
+import { fetchMalayDefinitions } from './services/malay-dictionary-service';
+
+if (typeof global.ReadableStream === 'undefined') {
+  global.ReadableStream = require('stream/web').ReadableStream;
+}
 
 const isProd = process.env.NODE_ENV === 'production'
 
@@ -192,6 +197,15 @@ const setupAutoUpdater = (mainWindow: BrowserWindow) => {
       return result;
     } catch (error) {
       console.error('Error exporting to Anki:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('malay:fetch-definitions', async (_event, word: string) => {
+    try {
+      return await fetchMalayDefinitions(word);
+    } catch (error) {
+      console.error('Error fetching Malay definitions:', error);
       throw error;
     }
   });
