@@ -114,15 +114,16 @@ export function SettingsDialog({
           <span className="sr-only">Settings</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle>Settings</DialogTitle>
           <DialogDescription>
             Customize your app preferences. Changes are saved automatically.
           </DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-6">
+        {/* Scrollable content area */}
+        <div className="flex-1 overflow-y-auto pr-2 -mr-2 space-y-6">
           {/* Appearance Section */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
@@ -270,7 +271,8 @@ export function SettingsDialog({
           </div>
         </div>
 
-        <div className="flex items-center justify-center gap-1 text-[10px] text-muted-foreground/60 mt-2">
+        {/* Fixed footer */}
+        <div className="flex-shrink-0 flex items-center justify-center gap-1 text-[10px] text-muted-foreground/60 mt-4 pt-4 border-t">
           Made with <Heart className="h-2.5 w-2.5 fill-current text-red-500" /> by
           <a 
             href="https://farhad.my" 
