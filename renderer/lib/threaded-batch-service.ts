@@ -16,6 +16,7 @@ export interface BatchProcessingOptions {
   audioSource: AudioSource;
   skipNoDefinition: boolean;
   skipNoAudio: boolean;
+  fetchDefinitions: boolean;
   maxConcurrent: number;
   onProgress?: (processed: number, total: number, currentWord: string, stats: ProgressStats) => void;
 }
@@ -78,14 +79,15 @@ async function processWord(
   word: string,
   audioSource: AudioSource,
   skipNoDefinition: boolean,
-  skipNoAudio: boolean
+  skipNoAudio: boolean,
+  fetchDefinitions: boolean
 ): Promise<BatchWordResult> {
   const wordToProcess = word.trim();
   
   try {
     // Fetch definition if needed
     let definition: string | undefined;
-    if (!skipNoDefinition) {
+    if (fetchDefinitions && !skipNoDefinition) {
       try {
         const fetchedDefinition = await rateLimitedFetchDefinition(wordToProcess);
         definition = fetchedDefinition || undefined;
@@ -159,6 +161,7 @@ async function processBatch(
   audioSource: AudioSource,
   skipNoDefinition: boolean,
   skipNoAudio: boolean,
+  fetchDefinitions: boolean,
   maxConcurrent: number,
   onProgress?: (processed: number, total: number, currentWord: string, stats: ProgressStats) => void
 ): Promise<BatchWordResult[]> {
@@ -204,7 +207,7 @@ async function processBatch(
       // Mark as processed immediately to prevent race conditions
       processedWords.add(wordToProcess);
       
-      const result = await processWord(word, audioSource, skipNoDefinition, skipNoAudio);
+      const result = await processWord(word, audioSource, skipNoDefinition, skipNoAudio, fetchDefinitions);
       
       // Update statistics
       if (result.success) {
@@ -239,6 +242,7 @@ export async function processWordsWithThreading(options: BatchProcessingOptions)
     audioSource,
     skipNoDefinition,
     skipNoAudio,
+    fetchDefinitions,
     maxConcurrent,
     onProgress
   } = options;
@@ -252,6 +256,7 @@ export async function processWordsWithThreading(options: BatchProcessingOptions)
       audioSource,
       skipNoDefinition,
       skipNoAudio,
+      fetchDefinitions,
       maxConcurrent,
       onProgress
     );

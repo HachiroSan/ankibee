@@ -5,7 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
-import { AlertCircle, Settings, Play, Pause, RefreshCw, ListPlus } from 'lucide-react';
+import { AlertCircle, Settings, Play, Pause, RefreshCw, ListPlus, BookOpen } from 'lucide-react';
 import { FcGoogle } from 'react-icons/fc';
 import { AudioSource, WordCard } from '@/types/deck';
 import { processWordsWithThreading, BatchProcessingResult, ProgressStats } from '@/lib/threaded-batch-service';
@@ -23,6 +23,7 @@ interface BatchAddFormProps {
 
 export function BatchAddForm({ onSubmit, isLoading, autoLowercase, existingCards }: BatchAddFormProps) {
   const [words, setWords] = useState('');
+  const [definitionService, setDefinitionService] = useState<'auto' | 'none'>('auto');
   const [audioSource, setAudioSource] = useState<AudioSource>('none');
   const [skipNoDefinition, setSkipNoDefinition] = useState(false);
   const [skipNoAudio, setSkipNoAudio] = useState(false);
@@ -115,8 +116,9 @@ export function BatchAddForm({ onSubmit, isLoading, autoLowercase, existingCards
       const result: BatchProcessingResult = await processWordsWithThreading({
         words: newWords,
         audioSource,
-        skipNoDefinition,
+        skipNoDefinition: definitionService === 'auto' ? skipNoDefinition : false,
         skipNoAudio,
+        fetchDefinitions: definitionService === 'auto',
         maxConcurrent,
         onProgress: (processed, total, currentWord, stats: ProgressStats) => {
           // Update progress state with real-time statistics
@@ -202,6 +204,34 @@ export function BatchAddForm({ onSubmit, isLoading, autoLowercase, existingCards
         </div>
 
         <div className="space-y-3">
+          {/* Definition Service Selection */}
+          <div className="space-y-1.5">
+            <Label className="text-xs font-medium">Definition</Label>
+            <Select
+              value={definitionService}
+              onValueChange={(value: 'auto' | 'none') => setDefinitionService(value)}
+              disabled={isLoading || isProcessing}
+            >
+              <SelectTrigger className="gradio-input h-8 text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="auto">
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="h-4 w-4" />
+                    <span>English</span>
+                  </div>
+                </SelectItem>
+                <SelectItem value="none">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4" />
+                    <span>Skip</span>
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="space-y-1.5">
             <Label className="text-xs font-medium">Audio Source</Label>
             <Select
@@ -244,7 +274,7 @@ export function BatchAddForm({ onSubmit, isLoading, autoLowercase, existingCards
                 id="skip-no-definition"
                 checked={skipNoDefinition}
                 onCheckedChange={setSkipNoDefinition}
-                disabled={isLoading || isProcessing}
+                disabled={isLoading || isProcessing || definitionService === 'none'}
               />
             </div>
 
