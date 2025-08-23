@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { RefreshCw, Expand, Minimize2 } from "lucide-react";
+import { GiBee } from "react-icons/gi";
 import {
   Tooltip,
   TooltipContent,
@@ -92,12 +93,12 @@ export function DefinitionInput({
             onValueChange={onDefinitionSourceChange}
             disabled={isLoading || disabled}
           >
-            <SelectTrigger className="h-6 w-20 text-xs">
-              <SelectValue />
+            <SelectTrigger className="h-7 w-20 text-xs px-2.5 py-1.5 bg-background border border-input hover:bg-accent hover:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+              <SelectValue className="text-xs font-medium" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="english">English</SelectItem>
-              <SelectItem value="malay">Malay</SelectItem>
+              <SelectItem value="english" className="text-xs">English</SelectItem>
+              <SelectItem value="malay" className="text-xs">Malay</SelectItem>
             </SelectContent>
           </Select>
           
@@ -105,11 +106,11 @@ export function DefinitionInput({
             <TooltipTrigger asChild>
               <Button
                 type="button"
-                variant="ghost"
+                variant="outline"
                 size="sm"
                 onClick={onFetchDefinition}
                 disabled={isLoading || !currentWord || isDefinitionFetching || disabled}
-                className="h-6 text-xs border border-yellow-400"
+                className="h-6 text-xs bg-gradient-to-r from-yellow-50 to-amber-50 hover:from-yellow-100 hover:to-amber-100 dark:from-yellow-950/30 dark:to-amber-950/30 dark:hover:from-yellow-900/50 dark:hover:to-amber-900/50 border-gray-200 dark:border-gray-700 hover:border-yellow-300 dark:hover:border-yellow-600 transition-all duration-200 shadow-sm"
               >
                 {isDefinitionFetching ? (
                   <motion.div
@@ -117,13 +118,13 @@ export function DefinitionInput({
                     animate={{ opacity: [0.5, 1] }}
                     transition={{ duration: 0.8, repeat: Infinity, ease: "easeInOut" }}
                   >
-                    <RefreshCw className="h-3 w-3 animate-spin" />
-                    <span>Fetching...</span>
+                    <RefreshCw className="h-3 w-3 animate-spin text-yellow-600 dark:text-yellow-400" />
+                    <span className="text-yellow-700 dark:text-yellow-300">Fetching...</span>
                   </motion.div>
                 ) : (
                   <>
-                    <RefreshCw className="h-3 w-3 mr-1.5" />
-                    <span>Fetch</span>
+                    <GiBee className="h-3 w-3 mr-1.5 text-yellow-600 dark:text-yellow-400" />
+                    <span className="text-yellow-700 dark:text-yellow-300">Fetch</span>
                   </>
                 )}
               </Button>
