@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, Expand, Minimize2 } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
@@ -39,16 +39,53 @@ export function DefinitionInput({
   definitionSource = 'english',
   onDefinitionSourceChange
 }: DefinitionInputProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const handleFocus = () => {
+    if (!isExpanded) {
+      setIsExpanded(true);
+    }
+  };
+
+  const handleBlur = () => {
+    // Only auto-collapse if the textarea is empty or has very short content
+    // This prevents accidentally collapsing when user is still typing
+    if (value.trim().length <= 50) {
+      setIsExpanded(false);
+    }
+  };
+
   return (
     <div className="space-y-2">
       <div className="space-y-2">
-        <Textarea
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder="Enter definition..."
-          className="gradio-input h-24 resize-none text-sm"
-          disabled={isLoading || disabled}
-        />
+        <div className="relative">
+          <Textarea
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+            placeholder="Enter definition..."
+            className={`gradio-input text-sm transition-all duration-200 ${
+              isExpanded ? 'min-h-[300px]' : 'h-24'
+            } resize-none`}
+            disabled={isLoading || disabled}
+          />
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsExpanded(!isExpanded)}
+            disabled={isLoading || disabled}
+            className="absolute right-2 top-2 h-6 w-6 p-0 hover:bg-muted/50"
+            title={isExpanded ? "Collapse" : "Expand"}
+          >
+            {isExpanded ? (
+              <Minimize2 className="h-3 w-3" />
+            ) : (
+              <Expand className="h-3 w-3" />
+            )}
+          </Button>
+        </div>
         <div className="flex items-center gap-2 justify-end">
           <Select
             value={definitionSource}
