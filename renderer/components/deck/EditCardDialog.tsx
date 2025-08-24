@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { WordCard, AudioSource } from '@/types/deck'
-import { Music, RefreshCw, Play, Trash2, Sparkles } from "lucide-react"
+import { Music, RefreshCw, Play, Trash2 } from "lucide-react"
 import { FcGoogle } from "react-icons/fc"
 import { fetchAudio, loadAudioWaveform, playAudio } from '@/lib/dictionary-service'
 import { fetchWordDefinition } from '@/lib/dictionary-service'
@@ -17,7 +17,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { DefinitionInput } from './form/DefinitionInput';
+
+import { GiBee } from "react-icons/gi";
 
 interface EditCardDialogProps {
   card: WordCard;
@@ -237,60 +238,55 @@ export function EditCardDialog({ card, isOpen, onClose, onSave, isLoading, autoL
                   <p>The meaning or explanation of the word</p>
                 </TooltipContent>
               </Tooltip>
-              <div className="relative">
+              <div className="space-y-2">
                 <Textarea
                   value={definition}
                   onChange={(e) => setDefinition(e.target.value)}
-                  className="min-h-[100px] pr-20"
+                  className="min-h-[100px]"
                   disabled={isLoading}
                 />
-                <div className="absolute right-2 top-2 flex gap-1">
+                <div className="flex items-center gap-2 justify-end">
                   <Select
                     value={definitionSource}
                     onValueChange={(value: 'english' | 'malay') => setDefinitionSource(value)}
                     disabled={isLoading}
                   >
-                    <SelectTrigger className="h-6 w-16 text-xs">
-                      <SelectValue />
+                    <SelectTrigger className="h-7 w-20 text-xs px-2.5 py-1.5 bg-background border border-input hover:bg-accent hover:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                      <SelectValue className="text-xs font-medium" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="english">EN</SelectItem>
-                      <SelectItem value="malay">MY</SelectItem>
+                      <SelectItem value="english" className="text-xs">English</SelectItem>
+                      <SelectItem value="malay" className="text-xs">Malay</SelectItem>
                     </SelectContent>
                   </Select>
-                  {isFetching ? (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      disabled={true}
-                      className="h-6 px-2 text-xs font-normal text-muted-foreground/40 hover:text-muted-foreground/40 hover:bg-transparent cursor-not-allowed"
-                    >
-                      <RefreshCw className="h-3 w-3 animate-spin" />
-                    </Button>
-                  ) : (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={handleFetchDefinition}
-                          disabled={isLoading || !word || isFetching}
-                          className="h-6 px-2 text-xs font-normal text-muted-foreground hover:text-primary hover:bg-primary/5"
-                        >
-                          {definitionSource === 'english' ? (
-                            <Sparkles className="h-3 w-3" />
-                          ) : (
-                            <Sparkles className="h-3 w-3" />
-                          )}
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Automatically fetch definition from {definitionSource === 'english' ? 'English' : 'Malay'} dictionary</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  )}
+                  
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleFetchDefinition}
+                        disabled={isLoading || !word || isFetching}
+                        className="h-6 text-xs bg-gradient-to-r from-yellow-50 to-amber-50 hover:from-yellow-100 hover:to-amber-100 dark:from-yellow-950/30 dark:to-amber-950/30 dark:hover:from-yellow-900/50 dark:hover:to-amber-900/50 border-gray-200 dark:border-gray-700 hover:border-yellow-300 dark:hover:border-yellow-600 transition-all duration-200 shadow-sm"
+                      >
+                        {isFetching ? (
+                          <div className="flex items-center gap-1.5">
+                            <RefreshCw className="h-3 w-3 animate-spin text-yellow-600 dark:text-yellow-400" />
+                            <span className="text-yellow-700 dark:text-yellow-300">Fetching...</span>
+                          </div>
+                        ) : (
+                          <>
+                            <GiBee className="h-3 w-3 mr-1.5 text-yellow-600 dark:text-yellow-400" />
+                            <span className="text-yellow-700 dark:text-yellow-300">Fetch</span>
+                          </>
+                        )}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Fetch definition from {definitionSource === 'english' ? 'English' : 'Malay'} dictionary</p>
+                    </TooltipContent>
+                  </Tooltip>
                 </div>
               </div>
             </div>
