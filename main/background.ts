@@ -3,7 +3,8 @@ import { app, ipcMain, BrowserWindow, dialog } from 'electron'
 import serve from 'electron-serve'
 import { createWindow } from './helpers'
 import { fetchWordDefinition, fetchAudio } from './services/dictionary-service'
-import { audioCacheService } from './services/audio-cache'
+import { audioCacheService } from './services/audio-cache';
+import { imageCacheService } from './services/image-cache';
 import { ankiExportService } from './services/anki-export'
 import { storageService } from './services/storage-service'
 import { autoUpdater } from 'electron-updater'
@@ -183,6 +184,43 @@ const setupAutoUpdater = (mainWindow: BrowserWindow) => {
       await audioCacheService.clearOldAudioCache(maxAge);
     } catch (error) {
       console.error('Error clearing old audio cache:', error);
+      throw error;
+    }
+  });
+
+  // Handle image cache events
+  ipcMain.handle('image:check-exists', async (_, key: string) => {
+    try {
+      return await imageCacheService.checkImageExists(key);
+    } catch (error) {
+      console.error('Error checking image exists:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('image:get-path', async (_, key: string) => {
+    try {
+      return await imageCacheService.getImagePath(key);
+    } catch (error) {
+      console.error('Error getting image path:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('image:save', async (_, key: string, buffer: Buffer) => {
+    try {
+      return await imageCacheService.saveImageToCache(key, buffer);
+    } catch (error) {
+      console.error('Error saving image to cache:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('image:clear-old', async (_, maxAge: number) => {
+    try {
+      await imageCacheService.clearOldImageCache(maxAge);
+    } catch (error) {
+      console.error('Error clearing old image cache:', error);
       throw error;
     }
   });

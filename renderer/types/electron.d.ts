@@ -19,10 +19,16 @@ declare global {
       fetchAudio: (word: string, region: 'us' | 'gb') => Promise<ArrayBuffer | null>
 
       // Audio cache methods
-      checkAudioExists: (key: string) => Promise<boolean>
-      getAudioPath: (key: string) => Promise<string | null>
-      saveAudioToCache: (key: string, buffer: Buffer) => Promise<string | null>
-      clearOldAudioCache: (maxAge: number) => Promise<void>
+      checkAudioExists: (key: string) => Promise<boolean>;
+      getAudioPath: (key: string) => Promise<string | null>;
+      saveAudioToCache: (key: string, buffer: Buffer) => Promise<string | null>;
+      clearOldAudioCache: (maxAge: number) => Promise<void>;
+
+      // Image cache methods
+      checkImageExists: (key: string) => Promise<boolean>;
+      getImagePath: (key: string) => Promise<string | null>;
+      saveImageToCache: (key: string, buffer: Buffer) => Promise<string | null>;
+      clearOldImageCache: (maxAge: number) => Promise<void>;
 
       // Anki export methods
       exportToAnki: (data: { cards: WordCard[]; deckName: string }) => Promise<{ success: boolean; filePath: string }>

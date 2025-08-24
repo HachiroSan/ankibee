@@ -3,7 +3,7 @@ import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Play, Trash2, ChevronRight, RefreshCw, AlertCircle, Pencil } from "lucide-react"
+import { Play, Trash2, ChevronRight, RefreshCw, AlertCircle, Pencil, Image, Music } from "lucide-react"
 import { WordCard } from '@/types/deck'
 import { loadAudioWaveform, playAudio, wavesurferInstances } from '@/lib/dictionary-service'
 import { audioManager } from '@/lib/audio-manager'
@@ -157,16 +157,46 @@ export function CollapsibleCard({ card, onRemove, onPlayAudio, onEdit, isLoading
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <h3 className="text-sm font-medium truncate">{card.word}</h3>
-                      <div className="flex gap-1">
-                        {!card.definition && (
-                          <Badge variant="outline" className="h-4 px-1 text-[10px] border-amber-500/20 text-amber-500 bg-amber-500/10">
-                            No Definition
-                          </Badge>
-                        )}
+                      {/* Card Status Badges */}
+                      <div className="flex items-center gap-1">
                         {!card.audioData && (
-                          <Badge variant="outline" className="h-4 px-1 text-[10px] border-violet-500/20 text-violet-500 bg-violet-500/10">
-                            No Audio
-                          </Badge>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Badge variant="destructive" className="h-4 text-[10px] px-1.5">
+                                <Music className="h-2.5 w-2.5 mr-0.5" />
+                                No Audio
+                              </Badge>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>This card has no audio</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+                        {!card.definition && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Badge variant="destructive" className="h-4 text-[10px] px-1.5">
+                                <AlertCircle className="h-2.5 w-2.5 mr-0.5" />
+                                No Definition
+                              </Badge>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>This card has no definition</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+                        {card.imageData && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Badge variant="secondary" className="h-4 text-[10px] px-1.5">
+                                <Image className="h-2.5 w-2.5 mr-0.5" />
+                                Has Image
+                              </Badge>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>This card has an image</p>
+                            </TooltipContent>
+                          </Tooltip>
                         )}
                       </div>
                     </div>
@@ -281,6 +311,20 @@ export function CollapsibleCard({ card, onRemove, onPlayAudio, onEdit, isLoading
                         />
                       </div>
                     )}
+                  </div>
+                )}
+
+                {/* Image Display */}
+                {card.imageData && (
+                  <div className="space-y-1">
+                    <div className="text-[11px] font-medium text-muted-foreground">Image</div>
+                    <div className="relative w-full h-32 bg-muted rounded overflow-hidden">
+                      <img
+                        src={URL.createObjectURL(new Blob([card.imageData]))}
+                        alt={`Illustration for ${card.word}`}
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
                   </div>
                 )}
               </div>

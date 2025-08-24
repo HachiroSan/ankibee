@@ -23,6 +23,26 @@ export default function DeckPage({ autoLowercase = true }: DeckPageProps) {
   const [deck, setDeck] = useState<DeckState | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Auto-save deck when it changes
+  useEffect(() => {
+    if (deck && deck.cards.length > 0) {
+      const saveDeck = async () => {
+        try {
+          await window.electron.saveDeck({
+            name: 'AnkiBee Deck',
+            cards: deck.cards
+          });
+        } catch (error) {
+          console.error('Failed to auto-save deck:', error);
+        }
+      };
+      
+      // Debounce the save to avoid too many saves
+      const timeoutId = setTimeout(saveDeck, 1000);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [deck]);
+
   useEffect(() => {
     const loadDeck = async () => {
       if (!id) return;
@@ -46,7 +66,7 @@ export default function DeckPage({ autoLowercase = true }: DeckPageProps) {
     loadDeck();
   }, [id, autoLowercase]);
 
-  const handleAddCard = async (word: string, definition: string, audioFile: File | undefined, audioSource: AudioSource) => {
+  const handleAddCard = async (word: string, definition: string, audioFile: File | undefined, audioSource: AudioSource, imageFile: File | undefined) => {
     if (!deck) return;
     
     try {
@@ -63,6 +83,11 @@ export default function DeckPage({ autoLowercase = true }: DeckPageProps) {
       if (audioFile) {
         const audioData = await audioFile.arrayBuffer();
         newCard.audioData = audioData;
+      }
+
+      if (imageFile) {
+        const imageData = await imageFile.arrayBuffer();
+        newCard.imageData = imageData;
       }
 
       setDeck({

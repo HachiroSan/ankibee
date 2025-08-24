@@ -90,7 +90,7 @@ export function ExportDialog({
 
       if (completeCards.length === 0) {
         toast.error('No valid cards to export', {
-          description: 'Each card must have a word, definition, and audio.'
+          description: 'Each card must have a word, definition, and audio. Images are optional.'
         })
         return
       }
@@ -156,6 +156,9 @@ export function ExportDialog({
                 ⚠️ {validationMessage}
               </p>
             )}
+            <p className="text-xs text-muted-foreground mt-2">
+              Note: Images are optional and will be included if provided.
+            </p>
           </div>
         </div>
 

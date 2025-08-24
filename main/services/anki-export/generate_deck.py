@@ -33,6 +33,13 @@ def validate_card(card: dict, index: int) -> bool:
         if not card[field].strip():
             logger.error(f"Card {index}: Field '{field}' is empty")
             return False
+    
+    # Log image information for debugging
+    if card.get('imageFileName'):
+        logger.info(f"Card {index} ({card['word']}) has image: {card['imageFileName']}")
+    else:
+        logger.info(f"Card {index} ({card['word']}) has no image")
+    
     return True
 
 def create_spelling_model() -> genanki.Model:
@@ -44,6 +51,7 @@ def create_spelling_model() -> genanki.Model:
             {'name': 'Word'},
             {'name': 'Definition'},
             {'name': 'Notes'},
+            {'name': 'Image'},
         ],
         templates=[{
             'name': 'Spelling Bee Card',
@@ -52,6 +60,12 @@ def create_spelling_model() -> genanki.Model:
                     <div class="audio-section">
                         {{Audio}}
                     </div>
+
+                    {{#Image}}
+                    <div class="image-section">
+                        {{Image}}
+                    </div>
+                    {{/Image}}
 
                     <div class="typing-section">
                         {{type:Word}}
@@ -87,6 +101,18 @@ def create_spelling_model() -> genanki.Model:
                 .audio-section audio {
                     width: 100%;
                     max-width: 300px;
+                }
+
+                .image-section {
+                    margin: 1.5rem 0;
+                    text-align: center;
+                }
+
+                .word-image {
+                    max-width: 100%;
+                    max-height: 200px;
+                    border-radius: 8px;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
                 }
 
                 .typing-section {
@@ -212,6 +238,10 @@ def create_spelling_model() -> genanki.Model:
                         font-size: 1rem;
                         padding: 0.6rem;
                     }
+
+                    .word-image {
+                        max-height: 150px;
+                    }
                 }
                 </style>
 
@@ -261,6 +291,12 @@ def create_deck(deck_name: str, cards: list, media_files: list, output_path: str
         logger.info(f"Number of media files: {len(media_files)}")
         logger.info(f"Media files: {media_files}")
         
+        # Log detailed card information for debugging
+        for i, card in enumerate(cards):
+            logger.info(f"Card {i+1}: {card.get('word', 'NO_WORD')} - "
+                       f"Audio: {card.get('audioFileName', 'NO_AUDIO')} - "
+                       f"Image: {card.get('imageFileName', 'NO_IMAGE')}")
+        
         # Validate cards
         valid_cards = []
         for i, card in enumerate(cards):
@@ -282,14 +318,34 @@ def create_deck(deck_name: str, cards: list, media_files: list, output_path: str
             try:
                 # Create note for each card
                 audio_tag = f'[sound:{card["audioFileName"]}]'
+                
+                # Handle image if available
+                image_tag = ''
+                if card.get('imageFileName'):
+                    # Wrap image filename in proper HTML img tag with CSS class
+                    image_tag = f'<img src="{card["imageFileName"]}" class="word-image" alt="{card["word"]}" />'
+                    logger.info(f"Card {i+1} ({card['word']}) image field set to: {image_tag}")
+                else:
+                    logger.info(f"Card {i+1} ({card['word']}) has no imageFileName field")
+                    logger.debug(f"Card {i+1} full data: {json.dumps(card, indent=2)}")
+                
                 fields = [
                     audio_tag,
                     card['word'],
                     card['definition'],
                     card.get('notes', ''),
+                    image_tag,
                 ]
                 logger.debug(f"Creating note {i+1} with fields: {fields}")
                 logger.debug(f"Audio tag: {audio_tag}")
+                if image_tag:
+                    logger.debug(f"Image tag: {image_tag}")
+                    logger.info(f"Card {i+1} ({card['word']}) has image: {image_tag}")
+                else:
+                    logger.info(f"Card {i+1} ({card['word']}) has no image")
+                
+                # Log the full card data for debugging
+                logger.debug(f"Full card data for {card['word']}: {json.dumps(card, indent=2)}")
                 
                 note = genanki.Note(
                     model=model,
@@ -307,7 +363,15 @@ def create_deck(deck_name: str, cards: list, media_files: list, output_path: str
         
         # Create and save the package
         package = genanki.Package(deck)
+        
+        # For genanki, media_files should contain the actual file paths
+        # The media files are already full paths from the TypeScript side
         package.media_files = media_files
+        
+        # Log package details for debugging
+        logger.info(f"Package created with {len(deck.notes)} notes")
+        logger.info(f"Media files assigned to package: {len(package.media_files)}")
+        logger.info(f"Media files list: {package.media_files}")
         
         # Ensure output directory exists
         os.makedirs(os.path.dirname(output_path), exist_ok=True)

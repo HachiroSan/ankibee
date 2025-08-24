@@ -36,6 +36,12 @@ interface ElectronWindow {
   getAudioPath: (key: string) => Promise<string | null>;
   saveAudioToCache: (key: string, buffer: Buffer) => Promise<string | null>;
   clearOldAudioCache: (maxAge: number) => Promise<void>;
+
+  // Image cache methods
+  checkImageExists: (key: string) => Promise<boolean>;
+  getImagePath: (key: string) => Promise<string | null>;
+  saveImageToCache: (key: string, buffer: Buffer) => Promise<string | null>;
+  clearOldImageCache: (maxAge: number) => Promise<void>;
   
   // Update handlers
   checkForUpdates: () => Promise<void>;

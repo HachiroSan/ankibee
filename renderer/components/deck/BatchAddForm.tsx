@@ -15,7 +15,7 @@ import { removeDuplicateWords, findDuplicateWords } from '@/lib/utils';
 import { BatchProgress } from './BatchProgress';
 
 interface BatchAddFormProps {
-  onSubmit: (words: Array<{ word: string, definition?: string, audioData?: ArrayBuffer, audioSource?: AudioSource }>) => void;
+  onSubmit: (words: Array<{ word: string, definition?: string, audioData?: ArrayBuffer, audioSource?: AudioSource, imageData?: ArrayBuffer }>) => void;
   isLoading: boolean;
   autoLowercase?: boolean;
   existingCards: WordCard[];

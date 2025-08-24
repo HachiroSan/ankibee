@@ -5,12 +5,13 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { WordCard, AudioSource } from '@/types/deck'
-import { Music, RefreshCw, Play, Trash2 } from "lucide-react"
+import { Music, RefreshCw, Play, Trash2, Image } from "lucide-react"
 import { FcGoogle } from "react-icons/fc"
 import { fetchAudio, loadAudioWaveform, playAudio } from '@/lib/dictionary-service'
 import { fetchWordDefinition } from '@/lib/dictionary-service'
 import { fetchMalayDefinitions } from '@/lib/malay-dictionary'
 import { toast } from 'sonner'
+import { ImageInput } from './form/ImageInput'
 import {
   Tooltip,
   TooltipContent,
@@ -42,6 +43,8 @@ export function EditCardDialog({ card, isOpen, onClose, onSave, isLoading, autoL
   });
   const [audioFile, setAudioFile] = useState<File>();
   const [audioData, setAudioData] = useState<ArrayBuffer | undefined>(card.audioData);
+  const [imageFile, setImageFile] = useState<File>();
+  const [imageData, setImageData] = useState<ArrayBuffer | undefined>(card.imageData);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
@@ -179,10 +182,21 @@ export function EditCardDialog({ card, isOpen, onClose, onSave, isLoading, autoL
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!word.trim()) {
       toast.error('Word is required');
       return;
+    }
+
+    let finalImageData = imageData;
+    if (imageFile) {
+      try {
+        finalImageData = await imageFile.arrayBuffer();
+      } catch (error) {
+        console.error('Error processing image file:', error);
+        toast.error('Failed to process image file');
+        return;
+      }
     }
 
     onSave({
@@ -193,7 +207,8 @@ export function EditCardDialog({ card, isOpen, onClose, onSave, isLoading, autoL
       audioSource,
       audioRegion: audioSource === 'google-us' ? 'us' : 
                   audioSource === 'google-uk' ? 'gb' : 
-                  undefined
+                  undefined,
+      imageData: finalImageData
     });
     onClose();
   };
@@ -204,16 +219,32 @@ export function EditCardDialog({ card, isOpen, onClose, onSave, isLoading, autoL
     setIsMalayDialogOpen(false);
   };
 
+  const handleCustomAudioRemove = () => {
+    setAudioFile(undefined);
+    setAudioData(undefined);
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    setImageFile(file);
+  };
+
+  const handleImageRemove = () => {
+    setImageFile(undefined);
+    setImageData(undefined);
+  };
+
   return (
     <TooltipProvider>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
+        <DialogContent className="sm:max-w-[500px] max-h-[90vh] flex flex-col">
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle>Edit Card</DialogTitle>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="space-y-2">
-              <Tooltip>
+          <div className="flex-1 overflow-y-auto">
+            <div className="grid gap-4 py-4">
+              <div className="space-y-2">
+                <Tooltip>
                 <TooltipTrigger asChild>
                   <label className="text-sm font-medium">Word</label>
                 </TooltipTrigger>
@@ -503,9 +534,36 @@ export function EditCardDialog({ card, isOpen, onClose, onSave, isLoading, autoL
                 </div>
               )}
             </div>
-          </div>
 
-          <div className="flex justify-end gap-2">
+            {/* Image Input Section */}
+            <ImageInput
+              currentImage={imageFile}
+              onImageChange={handleImageChange}
+              onImageRemove={handleImageRemove}
+              isLoading={isLoading}
+              instanceId="edit-card-dialog"
+            />
+            {imageData && !imageFile && (
+              <div className="text-xs text-muted-foreground">
+                Current image will be preserved
+              </div>
+            )}
+            {imageData && !imageFile && (
+              <div className="space-y-1">
+                <div className="text-[11px] font-medium text-muted-foreground">Current Image</div>
+                <div className="relative w-full h-32 bg-muted rounded overflow-hidden">
+                  <img
+                    src={URL.createObjectURL(new Blob([imageData]))}
+                    alt={`Current image for ${word}`}
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+              </div>
+            )}
+            </div>
+          </div>
+          
+          <div className="flex justify-end gap-2 mt-4 pt-4 border-t flex-shrink-0">
             <Button variant="outline" onClick={onClose}>Cancel</Button>
             <Tooltip>
               <TooltipTrigger asChild>

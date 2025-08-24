@@ -10,6 +10,10 @@ export interface WordCard {
   audioFileName?: string;
   audioRegion?: 'us' | 'gb';
   audioSource?: AudioSource;
+  // Image support
+  imageData?: ArrayBuffer;
+  imagePath?: string;
+  imageFileName?: string;
   createdAt: number; // timestamp in milliseconds
   updatedAt: number; // timestamp in milliseconds
 }

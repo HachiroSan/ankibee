@@ -60,12 +60,17 @@ class AnkiExportService {
   private async prepareMediaFiles(cards: WordCard[]): Promise<string[]> {
     const mediaFiles: string[] = []
     const outputDir = await this.ensureOutputDir()
+    let counter = 0
 
     for (const card of cards) {
+      console.log(`Processing card: ${card.word} - ID: ${card.id}`)
+      
       // Check for audio data in audioData or audioPath
       if (card.audioData || card.audioPath) {
-        // Create a filename that Anki will recognize
-        const fileName = `${card.word.toLowerCase().replace(/[^a-z0-9]/g, '_')}.mp3`
+        // Create a unique filename that Anki will recognize
+        // Use card ID or counter to ensure uniqueness
+        const uniqueId = card.id || `card_${++counter}`
+        const fileName = `${card.word.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${uniqueId}.mp3`
         const outputPath = path.join(outputDir, fileName)
         
         try {
@@ -77,12 +82,35 @@ class AnkiExportService {
             await fsPromises.writeFile(outputPath, Buffer.from(card.audioData))
           }
           
-          mediaFiles.push(outputPath)
+          mediaFiles.push(outputPath) // Store full path for genanki
           card.audioFileName = fileName
           console.log(`Prepared audio file for ${card.word}: ${fileName}`)
+          console.log(`Audio file added to mediaFiles array. Current count: ${mediaFiles.length}`)
         } catch (error) {
           console.error(`Failed to prepare audio file for ${card.word}:`, error)
           throw new Error(`Failed to prepare audio for ${card.word}`)
+        }
+      }
+
+      // Check for image data
+      if (card.imageData) {
+        // Create a unique filename for each image to avoid conflicts
+        // Use card ID or counter to ensure uniqueness
+        const uniqueId = card.id || `card_${++counter}`
+        const fileName = `${card.word.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${uniqueId}_img.jpg`
+        const outputPath = path.join(outputDir, fileName)
+        
+        try {
+          // Write image data to file
+          await fsPromises.writeFile(outputPath, Buffer.from(card.imageData))
+          
+          mediaFiles.push(outputPath) // Store full path for genanki
+          card.imageFileName = fileName
+          console.log(`Prepared image file for ${card.word}: ${fileName}`)
+          console.log(`Image file added to mediaFiles array. Current count: ${mediaFiles.length}`)
+        } catch (error) {
+          console.error(`Failed to prepare image file for ${card.word}:`, error)
+          throw new Error(`Failed to prepare image for ${card.word}`)
         }
       }
     }
@@ -122,7 +150,7 @@ class AnkiExportService {
       ? await dialog.showSaveDialog(window, options)
       : await dialog.showSaveDialog(options)
 
-    if (result.canceled) {
+    if (result.canceled || !result.filePath) {
       return null
     }
 
@@ -130,68 +158,74 @@ class AnkiExportService {
   }
 
   async exportDeck({ deckName, cards, window }: AnkiExportOptions): Promise<{ success: boolean; filePath: string }> {
-    try {
-      // Verify Python environment first
-      await this.verifyPythonEnvironment()
+    // Verify Python environment first
+    await this.verifyPythonEnvironment()
 
-      // Get save location from user
-      const outputPath = await this.getSaveFilePath(window, deckName)
-      if (!outputPath) {
-        throw new Error('Export cancelled by user')
-      }
+    // Get save location from user
+    const outputPath = await this.getSaveFilePath(window, deckName)
+    if (!outputPath) {
+      throw new Error('Export cancelled by user')
+    }
 
-      // Log card data for debugging
-      console.log('Checking cards for export:')
-      cards.forEach((card, index) => {
-        console.log(`Card ${index + 1}:`, {
+    // Log card data for debugging
+    console.log('Checking cards for export:')
+    cards.forEach((card, index) => {
+      console.log(`Card ${index + 1}:`, {
+        word: card.word,
+        hasDefinition: !!card.definition,
+        hasAudioData: !!card.audioData,
+        hasAudioPath: !!card.audioPath,
+        audioPath: card.audioPath,
+      })
+    })
+
+    // Filter out cards without required data
+    const validCards = cards.filter(card => {
+      const isValid = card.word?.trim() && 
+        card.definition?.trim() &&
+        (card.audioData || card.audioPath)
+
+      if (!isValid) {
+        console.log(`Invalid card:`, {
           word: card.word,
-          hasDefinition: !!card.definition,
-          hasAudioData: !!card.audioData,
-          hasAudioPath: !!card.audioPath,
-          audioPath: card.audioPath,
+          hasDefinition: !!card.definition?.trim(),
+          hasAudio: !!(card.audioData || card.audioPath)
         })
-      })
-
-      // Filter out cards without required data
-      const validCards = cards.filter(card => {
-        const isValid = card.word?.trim() && 
-          card.definition?.trim() &&
-          (card.audioData || card.audioPath)
-
-        if (!isValid) {
-          console.log(`Invalid card:`, {
-            word: card.word,
-            hasDefinition: !!card.definition?.trim(),
-            hasAudio: !!(card.audioData || card.audioPath)
-          })
-        }
-
-        return isValid
-      })
-
-      if (validCards.length === 0) {
-        console.error('Card validation failed. No valid cards found.')
-        console.log('Card requirements:', {
-          needsWord: true,
-          needsDefinition: true,
-          needsAudio: true,
-        })
-        throw new Error('No valid cards to export. Each card must have a word, definition, and audio.')
       }
 
-      console.log('Export validation:', {
-        total: cards.length,
-        valid: validCards.length,
-        sample: {
-          word: validCards[0].word,
-          hasDefinition: !!validCards[0].definition,
-          hasAudioData: !!validCards[0].audioData,
-          hasAudioPath: !!validCards[0].audioPath,
-        }
-      })
+      return isValid
+    })
 
-      // Prepare media files
-      const mediaFiles = await this.prepareMediaFiles(validCards)
+    if (validCards.length === 0) {
+      console.error('Card validation failed. No valid cards found.')
+      console.log('Card requirements:', {
+        needsWord: true,
+        needsDefinition: true,
+        needsAudio: true,
+      })
+      throw new Error('No valid cards to export. Each card must have a word, definition, and audio.')
+    }
+
+    console.log('Export validation:', {
+      total: cards.length,
+      valid: validCards.length,
+      sample: {
+        word: validCards[0].word,
+        hasDefinition: !!validCards[0].definition,
+        hasAudioData: !!validCards[0].audioData,
+        hasAudioPath: !!validCards[0].audioPath,
+        hasImageData: !!validCards[0].imageData,
+      }
+    })
+
+    // Prepare media files
+    let mediaFiles: string[] = []
+    try {
+      mediaFiles = await this.prepareMediaFiles(validCards)
+
+      // Log media files for debugging
+      console.log('Prepared media files:', mediaFiles)
+      console.log('Media files count:', mediaFiles.length)
 
       if (mediaFiles.length === 0) {
         throw new Error('Failed to prepare audio files for export')
@@ -204,6 +238,15 @@ class AnkiExportService {
         mediaFiles,
         outputPath
       }
+      
+      // Log input data for debugging
+      console.log('Input data for Python script:', {
+        deckName,
+        cardCount: validCards.length,
+        mediaFilesCount: mediaFiles.length,
+        mediaFiles,
+        outputPath
+      })
 
       // Execute Python script
       const result = await new Promise<{ success: boolean; outputPath: string; error?: string }>((resolve, reject) => {
@@ -259,12 +302,12 @@ class AnkiExportService {
         pythonProcess.stdin.end()
       })
 
-      // Clean up temporary media files
-      await Promise.all(mediaFiles.map(file => fsPromises.unlink(file)))
-
       if (!result.success) {
         throw new Error(result.error || 'Failed to create Anki package')
       }
+
+      // Clean up temporary media files after successful package creation
+      await Promise.all(mediaFiles.map(file => fsPromises.unlink(file)))
 
       return {
         success: true,
@@ -272,6 +315,16 @@ class AnkiExportService {
       }
     } catch (error) {
       console.error('Anki export error:', error)
+      
+      // Clean up temporary media files even if there's an error
+      try {
+        if (mediaFiles && mediaFiles.length > 0) {
+          await Promise.all(mediaFiles.map((file: string) => fsPromises.unlink(file)))
+        }
+      } catch (cleanupError) {
+        console.error('Failed to clean up media files:', cleanupError)
+      }
+      
       throw error
     }
   }

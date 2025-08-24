@@ -145,9 +145,10 @@ export default function HomePage({ autoLowercase = true }: HomePageProps) {
     }
   }, []);
 
-  const handleAddCard = async (word: string, definition: string, audioFile: File | undefined, audioSource: AudioSource) => {
+  const handleAddCard = async (word: string, definition: string, audioFile: File | undefined, audioSource: AudioSource, imageFile: File | undefined) => {
     setIsLoading(true);
     let audioData: ArrayBuffer | undefined;
+    let imageData: ArrayBuffer | undefined;
     let region: 'us' | 'gb' | undefined;
     
     const wordToStore = isAutoLowercase === true ? word.toLowerCase() : word;
@@ -181,6 +182,11 @@ export default function HomePage({ autoLowercase = true }: HomePageProps) {
         );
       }
 
+      // Handle image if provided
+      if (imageFile) {
+        imageData = await imageFile.arrayBuffer();
+      }
+
       const timestamp = Date.now();
       // Only add the card if everything is ready
       const newCard: WordCard = {
@@ -190,14 +196,16 @@ export default function HomePage({ autoLowercase = true }: HomePageProps) {
         audioData,
         audioRegion: region,
         audioSource,
+        imageData,
         createdAt: timestamp,
         updatedAt: timestamp
       };
 
       setCards([...cards, newCard]);
 
+      const imageText = imageData ? ' with image' : '';
       toast.success('Card Added', {
-        description: `Added "${wordToStore}" with ${audioSource === 'google-us' ? 'US' : audioSource === 'google-uk' ? 'GB' : 'custom'} pronunciation`
+        description: `Added "${wordToStore}" with ${audioSource === 'google-us' ? 'US' : audioSource === 'google-uk' ? 'GB' : 'custom'} pronunciation${imageText}`
       });
     } catch (error) {
       toast.error('Failed to add card', { 

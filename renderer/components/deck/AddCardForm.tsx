@@ -30,11 +30,12 @@ import {
 import { WordCard } from '@/types/deck'
 import { fetchMalayDefinitions, MalayDefinition } from '@/lib/malay-dictionary';
 import { DefinitionInput } from './form/DefinitionInput';
+import { ImageInput } from './form/ImageInput';
 
 
 interface AddCardFormProps {
-  onSubmit: (word: string, definition: string, audioFile: File | undefined, audioSource: AudioSource) => void;
-  onBatchSubmit: (words: Array<{ word: string, definition?: string, audioData?: ArrayBuffer, audioSource?: AudioSource }>) => void;
+  onSubmit: (word: string, definition: string, audioFile: File | undefined, audioSource: AudioSource, imageFile: File | undefined) => void;
+  onBatchSubmit: (words: Array<{ word: string, definition?: string, audioData?: ArrayBuffer, audioSource?: AudioSource, imageData?: ArrayBuffer }>) => void;
   isLoading: boolean;
   autoLowercase?: boolean;
   existingCards: WordCard[];
@@ -86,6 +87,7 @@ export function AddCardForm({ onSubmit, onBatchSubmit, isLoading: formIsLoading,
   const [currentWord, setCurrentWord] = useState('');
   const [currentDefinition, setCurrentDefinition] = useState('');
   const [currentAudio, setCurrentAudio] = useState<File | undefined>(undefined);
+  const [currentImage, setCurrentImage] = useState<File | undefined>(undefined);
 
   const [audioSource, setAudioSource] = useState<AudioSource>('google-us');
   const [audioPreview, setAudioPreview] = useState<AudioPreview | null>(null);
@@ -130,12 +132,14 @@ export function AddCardForm({ onSubmit, onBatchSubmit, isLoading: formIsLoading,
           currentWord, 
           currentDefinition, 
           currentAudio,
-          audioPreview.source
+          audioPreview.source,
+          currentImage
         );
         // Only clear form after successful submission
         setCurrentWord('');
         setCurrentDefinition('');
         setCurrentAudio(undefined);
+        setCurrentImage(undefined);
         setAudioPreview(null);
         setIsPlaying(false);
       } catch (error) {
@@ -326,6 +330,19 @@ export function AddCardForm({ onSubmit, onBatchSubmit, isLoading: formIsLoading,
     }
   };
 
+  const handleCustomAudioRemove = () => {
+    setCurrentAudio(undefined);
+    setAudioPreview(null);
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    setCurrentImage(file);
+  };
+
+  const handleImageRemove = () => {
+    setCurrentImage(undefined);
+  };
 
 
   const renderAudioSourceIcon = (source: AudioSource) => {
@@ -518,12 +535,7 @@ export function AddCardForm({ onSubmit, onBatchSubmit, isLoading: formIsLoading,
                                     type="button"
                                     variant="outline"
                                     size="icon"
-                                    onClick={() => {
-                                      setCurrentAudio(undefined);
-                                      setAudioPreview(null);
-                                      const input = document.getElementById('audio-file-input') as HTMLInputElement;
-                                      if (input) input.value = '';
-                                    }}
+                                    onClick={handleCustomAudioRemove}
                                     disabled={formIsLoading}
                                     className="gradio-button h-8 w-8"
                                   >
@@ -625,6 +637,14 @@ export function AddCardForm({ onSubmit, onBatchSubmit, isLoading: formIsLoading,
                   </div>
                 </div>
 
+                {/* Image Input Section */}
+                <ImageInput
+                  currentImage={currentImage}
+                  onImageChange={handleImageChange}
+                  onImageRemove={handleImageRemove}
+                  isLoading={formIsLoading}
+                  instanceId="add-card-form"
+                />
 
 
                 <Tooltip>

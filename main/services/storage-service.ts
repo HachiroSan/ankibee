@@ -2,6 +2,7 @@ import fs from 'fs/promises'
 import path from 'path'
 import { app } from 'electron'
 import { audioCacheService } from './audio-cache'
+import { imageCacheService } from './image-cache'
 
 interface Card {
   id: string;
@@ -10,6 +11,7 @@ interface Card {
   audioSource: string;
   audioRegion?: string;
   audioData?: ArrayBuffer;
+  imageData?: ArrayBuffer;
   createdAt: string;
   updatedAt: string;
 }
@@ -29,14 +31,23 @@ class StorageService {
 
   async saveDeck(data: DeckData) {
     try {
-      // Save audio data to cache for each card
-      const cardsWithAudioKeys = await Promise.all(data.cards.map(async (card: Card) => {
+      // Save audio and image data to cache for each card
+      const cardsWithMediaKeys = await Promise.all(data.cards.map(async (card: Card) => {
         let audioKey = null;
+        let imageKey = null;
+        
         if (card.audioData && card.audioSource !== 'none') {
           // Create a unique key for the audio
-          audioKey = `${card.id}-${card.audioSource}-${Date.now()}`;
+          audioKey = `${card.id}-audio-${Date.now()}`;
           // Save audio to cache
           await audioCacheService.saveAudioToCache(audioKey, Buffer.from(card.audioData));
+        }
+        
+        if (card.imageData) {
+          // Create a unique key for the image
+          imageKey = `${card.id}-image-${Date.now()}`;
+          // Save image to cache (format will be auto-detected)
+          await imageCacheService.saveImageToCache(imageKey, Buffer.from(card.imageData));
         }
         
         return {
@@ -46,6 +57,7 @@ class StorageService {
           audioSource: card.audioSource,
           audioRegion: card.audioRegion,
           audioKey, // Store the key to retrieve audio later
+          imageKey, // Store the key to retrieve image later
           createdAt: card.createdAt,
           updatedAt: card.updatedAt
         };
@@ -53,7 +65,7 @@ class StorageService {
 
       const sanitizedData = {
         name: data.name,
-        cards: cardsWithAudioKeys
+        cards: cardsWithMediaKeys
       };
       
       console.log('Saving deck:', {
@@ -74,11 +86,13 @@ class StorageService {
     try {
       console.log('Loading deck from:', this.dataPath);
       const data = await fs.readFile(this.dataPath, 'utf-8');
-      const parsedData = JSON.parse(data) as DeckData & { cards: (Card & { audioKey?: string })[] };
+      const parsedData = JSON.parse(data) as DeckData & { cards: (Card & { audioKey?: string, imageKey?: string })[] };
 
-      // Restore audio data for each card
-      const cardsWithAudio = await Promise.all(parsedData.cards.map(async (card: Card & { audioKey?: string }) => {
+      // Restore audio and image data for each card
+      const cardsWithMedia = await Promise.all(parsedData.cards.map(async (card: Card & { audioKey?: string, imageKey?: string }) => {
         let audioData = undefined;
+        let imageData = undefined;
+        
         if (card.audioKey && card.audioSource !== 'none') {
           try {
             // Check if audio exists in cache
@@ -94,22 +108,41 @@ class StorageService {
           }
         }
         
-        // Return card with audio data if available
+        if (card.imageKey) {
+          try {
+            // Check if image exists in cache
+            const exists = await imageCacheService.checkImageExists(card.imageKey);
+            if (exists) {
+              // Get the image path and read the file
+              const imagePath = await imageCacheService.getImagePath(card.imageKey);
+              if (imagePath) {
+                const buffer = await fs.readFile(imagePath);
+                imageData = buffer.buffer;
+              }
+            }
+          } catch (error) {
+            console.error(`Error loading image for card ${card.id}:`, error);
+          }
+        }
+        
+        // Return card with media data if available
         return {
           ...card,
           audioData,
-          audioKey: undefined // Don't expose the audioKey to the renderer
+          imageData,
+          audioKey: undefined, // Don't expose the audioKey to the renderer
+          imageKey: undefined  // Don't expose the imageKey to the renderer
         };
       }));
 
       console.log('Loaded deck:', {
-        cardCount: cardsWithAudio.length,
+        cardCount: cardsWithMedia.length,
         name: parsedData.name
       });
       
       return {
         name: parsedData.name,
-        cards: cardsWithAudio
+        cards: cardsWithMedia
       };
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code === 'ENOENT') {

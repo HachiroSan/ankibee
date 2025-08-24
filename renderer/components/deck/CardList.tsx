@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { CollapsibleCard } from './CollapsibleCard'
 import { WordCard } from '@/types/deck'
-import { Search, ArrowUpDown, Music, BookText } from 'lucide-react'
+import { Search, ArrowUpDown, Music, BookText, Image } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Badge } from "@/components/ui/badge"
 
@@ -18,7 +18,7 @@ interface CardListProps {
 }
 
 type SortOption = 'newest' | 'oldest' | 'a-z' | 'z-a';
-type FilterOption = 'all' | 'no-audio' | 'no-definition';
+type FilterOption = 'all' | 'no-audio' | 'no-definition' | 'has-image' | 'no-image';
 
 export function CardList({ 
   cards, 
@@ -44,6 +44,12 @@ export function CardList({
         break;
       case 'no-definition':
         result = result.filter(card => !card.definition);
+        break;
+      case 'has-image':
+        result = result.filter(card => card.imageData);
+        break;
+      case 'no-image':
+        result = result.filter(card => !card.imageData);
         break;
     }
 
@@ -78,6 +84,8 @@ export function CardList({
   // Count cards with missing audio/definition
   const missingAudioCount = useMemo(() => cards.filter(card => !card.audioData).length, [cards]);
   const missingDefinitionCount = useMemo(() => cards.filter(card => !card.definition).length, [cards]);
+  const missingImageCount = useMemo(() => cards.filter(card => !card.imageData).length, [cards]);
+  const hasImageCount = useMemo(() => cards.filter(card => card.imageData).length, [cards]);
 
   return (
     <div className="flex flex-col">
@@ -128,6 +136,28 @@ export function CardList({
                     {missingDefinitionCount > 0 && (
                       <Badge variant="secondary" className="ml-auto h-4 text-[10px]">
                         {missingDefinitionCount}
+                      </Badge>
+                    )}
+                  </div>
+                </SelectItem>
+                <SelectItem value="has-image">
+                  <div className="flex items-center gap-2">
+                    <Image className="h-3.5 w-3.5" />
+                    <span>Has Image</span>
+                    {hasImageCount > 0 && (
+                      <Badge variant="secondary" className="ml-auto h-4 text-[10px]">
+                        {hasImageCount}
+                      </Badge>
+                    )}
+                  </div>
+                </SelectItem>
+                <SelectItem value="no-image">
+                  <div className="flex items-center gap-2">
+                    <Image className="h-3.5 w-3.5" />
+                    <span>No Image</span>
+                    {missingImageCount > 0 && (
+                      <Badge variant="secondary" className="ml-auto h-4 text-[10px]">
+                        {missingImageCount}
                       </Badge>
                     )}
                   </div>

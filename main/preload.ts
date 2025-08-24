@@ -40,6 +40,12 @@ contextBridge.exposeInMainWorld('electron', {
   saveAudioToCache: (key: string, buffer: Buffer) => ipcRenderer.invoke('audio:save', key, buffer),
   clearOldAudioCache: (maxAge: number) => ipcRenderer.invoke('audio:clear-old', maxAge),
 
+  // Image cache methods
+  checkImageExists: (key: string) => ipcRenderer.invoke('image:check-exists', key),
+  getImagePath: (key: string) => ipcRenderer.invoke('image:get-path', key),
+  saveImageToCache: (key: string, buffer: Buffer) => ipcRenderer.invoke('image:save', key, buffer),
+  clearOldImageCache: (maxAge: number) => ipcRenderer.invoke('image:clear-old', maxAge),
+
   // Anki export methods
   exportToAnki: (data: { cards: WordCard[]; deckName: string }) => 
     ipcRenderer.invoke('deck:export-anki', data),
