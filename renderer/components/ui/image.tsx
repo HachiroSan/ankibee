@@ -7,10 +7,10 @@ interface ImageProps extends Omit<NextImageProps, 'fetchPriority'> {
 
 export const Image: React.FC<ImageProps> = ({ fetchPriority, ...props }) => {
   // Convert fetchPriority to lowercase to avoid React warning
-  const imageProps = {
+  const imageProps: NextImageProps = {
     ...props,
     ...(fetchPriority && { fetchpriority: fetchPriority })
-  }
+  } as NextImageProps
 
   return <NextImage {...imageProps} />
 } 
