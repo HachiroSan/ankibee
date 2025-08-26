@@ -368,15 +368,21 @@ export function AddCardForm({ onSubmit, onBatchSubmit, isLoading: formIsLoading,
     <TooltipProvider>
       <Card className="gradio-card">
         <CardHeader className="pb-2 px-3 pt-3">
-          <div className="flex items-center justify-between">
-            <div>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex-1 min-w-0">
               <CardTitle className="text-base font-medium">Add New Word</CardTitle>
-                             <CardDescription className="text-xs">Create a new spelling bee card with word, optional definition, and optional audio.</CardDescription>
+              <CardDescription className="text-xs leading-relaxed">
+                <span className="hidden sm:inline">Create a new spelling bee card with word, optional definition, and optional audio.</span>
+                <span className="sm:hidden">Create a new spelling bee card.</span>
+              </CardDescription>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Label htmlFor="batch-mode" className="text-sm">Batch Mode</Label>
+                  <Label htmlFor="batch-mode" className="text-sm whitespace-nowrap">
+                    <span className="hidden sm:inline">Batch Mode</span>
+                    <span className="sm:hidden">Batch</span>
+                  </Label>
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>Switch to batch mode to add multiple words at once</p>
