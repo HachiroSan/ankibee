@@ -226,7 +226,7 @@ const setupAutoUpdater = (mainWindow: BrowserWindow) => {
   });
 
   // Handle Anki export
-  ipcMain.handle('deck:export-anki', async (_, data: { cards: any[]; deckName: string }) => {
+  ipcMain.handle('deck:export-anki', async (_, data: { cards: any[]; deckName: string; compression?: { enabled?: boolean; maxDimension?: number; jpegQuality?: number } }) => {
     try {
       const result = await ankiExportService.exportDeck({
         ...data,

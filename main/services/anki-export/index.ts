@@ -4,11 +4,13 @@ import fs from 'fs'
 import { promises as fsPromises } from 'fs'
 import { app, dialog, BrowserWindow } from 'electron'
 import { WordCard } from '../../../renderer/types/deck'
+import { compressAndWriteImage } from './imageCompression'
 
 interface AnkiExportOptions {
   deckName: string
   cards: WordCard[]
   window?: BrowserWindow
+  compression?: { enabled?: boolean; maxDimension?: number; jpegQuality?: number }
 }
 
 class AnkiExportService {
@@ -57,8 +59,11 @@ class AnkiExportService {
     return outputDir
   }
 
-  private async prepareMediaFiles(cards: WordCard[]): Promise<string[]> {
+  private async prepareMediaFiles(cards: WordCard[], compression?: { enabled?: boolean; maxDimension?: number; jpegQuality?: number }): Promise<{ mediaFiles: string[]; compressionStats: { images: number; inputBytes: number; outputBytes: number } }> {
     const mediaFiles: string[] = []
+    let images = 0
+    let inputBytes = 0
+    let outputBytes = 0
     const outputDir = await this.ensureOutputDir()
     let counter = 0
 
@@ -94,20 +99,21 @@ class AnkiExportService {
 
       // Check for image data
       if (card.imageData) {
-        // Create a unique filename for each image to avoid conflicts
-        // Use card ID or counter to ensure uniqueness
+        // Create a unique filename base (extension decided by compressor)
         const uniqueId = card.id || `card_${++counter}`
-        const fileName = `${card.word.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${uniqueId}_img.jpg`
-        const outputPath = path.join(outputDir, fileName)
-        
+        const baseName = `${card.word.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${uniqueId}_img`
+        const basePathNoExt = path.join(outputDir, baseName)
+
         try {
-          // Write image data to file
-          await fsPromises.writeFile(outputPath, Buffer.from(card.imageData))
-          
-          mediaFiles.push(outputPath) // Store full path for genanki
+          const result = await compressAndWriteImage(Buffer.from(card.imageData), basePathNoExt, compression)
+          const { filePath, fileName } = result
+          mediaFiles.push(filePath)
           card.imageFileName = fileName
-          console.log(`Prepared image file for ${card.word}: ${fileName}`)
+          console.log(`Prepared compressed image for ${card.word}: ${fileName}`)
           console.log(`Image file added to mediaFiles array. Current count: ${mediaFiles.length}`)
+          images += 1
+          inputBytes += result.inputBytes
+          outputBytes += result.outputBytes
         } catch (error) {
           console.error(`Failed to prepare image file for ${card.word}:`, error)
           throw new Error(`Failed to prepare image for ${card.word}`)
@@ -115,7 +121,7 @@ class AnkiExportService {
       }
     }
 
-    return mediaFiles
+    return { mediaFiles, compressionStats: { images, inputBytes, outputBytes } }
   }
 
   private async verifyPythonEnvironment(): Promise<void> {
@@ -157,7 +163,7 @@ class AnkiExportService {
     return result.filePath
   }
 
-  async exportDeck({ deckName, cards, window }: AnkiExportOptions): Promise<{ success: boolean; filePath: string }> {
+  async exportDeck({ deckName, cards, window, compression }: AnkiExportOptions): Promise<{ success: boolean; filePath: string; compression?: { images: number; inputBytes: number; outputBytes: number; savedBytes: number; savedPercent: number } }> {
     // Verify Python environment first
     await this.verifyPythonEnvironment()
 
@@ -220,8 +226,11 @@ class AnkiExportService {
 
     // Prepare media files
     let mediaFiles: string[] = []
+    let compressionStats: { images: number; inputBytes: number; outputBytes: number } = { images: 0, inputBytes: 0, outputBytes: 0 }
     try {
-      mediaFiles = await this.prepareMediaFiles(validCards)
+      const prep = await this.prepareMediaFiles(validCards, compression)
+      mediaFiles = prep.mediaFiles
+      compressionStats = prep.compressionStats
 
       // Log media files for debugging
       console.log('Prepared media files:', mediaFiles)
@@ -309,9 +318,19 @@ class AnkiExportService {
       // Clean up temporary media files after successful package creation
       await Promise.all(mediaFiles.map(file => fsPromises.unlink(file)))
 
+      const savedBytes = Math.max(0, compressionStats.inputBytes - compressionStats.outputBytes)
+      const savedPercent = compressionStats.inputBytes > 0 ? Math.round((savedBytes / compressionStats.inputBytes) * 100) : 0
+
       return {
         success: true,
-        filePath: outputPath
+        filePath: outputPath,
+        compression: {
+          images: compressionStats.images,
+          inputBytes: compressionStats.inputBytes,
+          outputBytes: compressionStats.outputBytes,
+          savedBytes,
+          savedPercent
+        }
       }
     } catch (error) {
       console.error('Anki export error:', error)

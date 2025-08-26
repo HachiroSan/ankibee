@@ -31,7 +31,15 @@ declare global {
       clearOldImageCache: (maxAge: number) => Promise<void>;
 
       // Anki export methods
-      exportToAnki: (data: { cards: WordCard[]; deckName: string }) => Promise<{ success: boolean; filePath: string }>
+      exportToAnki: (data: { 
+        cards: WordCard[]; 
+        deckName: string;
+        compression?: { enabled?: boolean; maxDimension?: number; jpegQuality?: number; pngQuality?: number; pngCompressionLevel?: number; pngEffort?: number }
+      }) => Promise<{ 
+        success: boolean; 
+        filePath: string;
+        compression?: { images: number; inputBytes: number; outputBytes: number; savedBytes: number; savedPercent: number }
+      }>
     }
   }
 }

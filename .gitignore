@@ -19,6 +19,8 @@
 /app
 /dist
 
+#tmp
+.tmp_*
 # misc
 .DS_Store
 *.pem

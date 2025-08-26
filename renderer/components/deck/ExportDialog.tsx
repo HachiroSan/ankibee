@@ -10,6 +10,7 @@ import { maskWord } from '@/lib/utils'
 interface ExportResult {
   success: boolean;
   filePath?: string;
+  compression?: { images: number; inputBytes: number; outputBytes: number; savedBytes: number; savedPercent: number };
 }
 
 interface ExportDialogProps {
@@ -98,12 +99,23 @@ export function ExportDialog({
       // Export to Anki
       const result = await window.electron.exportToAnki({
         cards: completeCards,
-        deckName: deckName.trim()
+        deckName: deckName.trim(),
+        compression: {
+          enabled: localStorage.getItem('compressImages') !== 'false',
+          maxDimension: Number(localStorage.getItem('compressMaxDimension') || 1280),
+          jpegQuality: Number(localStorage.getItem('compressJpegQuality') || 72),
+          pngQuality: Number(localStorage.getItem('compressPngQuality') || 70),
+          pngCompressionLevel: Number(localStorage.getItem('compressPngCompression') || 9),
+          pngEffort: Number(localStorage.getItem('compressPngEffort') || 7),
+          gifEffort: Number(localStorage.getItem('compressGifEffort') || 7),
+        }
       }) as ExportResult
 
       if (result.success) {
+        const comp = result.compression
+        const extra = comp && comp.images > 0 ? ` • Images: ${comp.images}, Saved ${Math.round((comp.savedBytes || 0)/1024)} KB (${comp.savedPercent || 0}%)` : ''
         toast.success('Deck exported successfully!', {
-          description: `Saved to: ${result.filePath}`
+          description: `Saved to: ${result.filePath}${extra}`
         })
         onClose()
       } else {

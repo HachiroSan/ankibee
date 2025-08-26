@@ -18,6 +18,7 @@ interface ProgressInfo {
 interface ExportResult {
   success: boolean;
   filePath?: string;
+  compression?: { images: number; inputBytes: number; outputBytes: number; savedBytes: number; savedPercent: number }
 }
 
 interface ElectronWindow {
@@ -29,7 +30,7 @@ interface ElectronWindow {
   loadDeck: () => Promise<{ cards: WordCard[]; name: string } | null>;
   fetchWordDefinition: (word: string) => Promise<string | null>;
   fetchAudio: (word: string, region: 'us' | 'gb') => Promise<ArrayBuffer | null>;
-  exportToAnki: (data: { cards: WordCard[]; deckName: string }) => Promise<ExportResult>;
+  exportToAnki: (data: { cards: WordCard[]; deckName: string; compression?: { enabled?: boolean; maxDimension?: number; jpegQuality?: number; pngQuality?: number; pngCompressionLevel?: number; pngEffort?: number; gifEffort?: number } }) => Promise<ExportResult>;
   
   // Audio cache methods
   checkAudioExists: (key: string) => Promise<boolean>;

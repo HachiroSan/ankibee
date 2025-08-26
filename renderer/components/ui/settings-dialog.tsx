@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { SlidersVertical, Moon, Sun, Monitor, Heart, RefreshCw } from "lucide-react"
+import { SlidersVertical, Moon, Sun, Monitor, Heart, RefreshCw, Image } from "lucide-react"
 import { toast } from "sonner"
 import {
   Dialog,
@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
+import { Slider } from "@/components/ui/slider"
 import {
   Select,
   SelectContent,
@@ -43,6 +44,46 @@ export function SettingsDialog({
 }: SettingsDialogProps) {
   const [isCheckingUpdate, setIsCheckingUpdate] = useState(false);
   const [updateStatus, setUpdateStatus] = useState<string>('');
+  const [compressImages, setCompressImages] = useState(true);
+  const [maxDimension, setMaxDimension] = useState(1280);
+  const [jpegQuality, setJpegQuality] = useState(72);
+  const [pngQuality, setPngQuality] = useState(70);
+  const [pngCompression, setPngCompression] = useState(9);
+  const [pngEffort, setPngEffort] = useState(7);
+  const [gifEffort, setGifEffort] = useState(7);
+
+  useEffect(() => {
+    // Load image compression settings from localStorage
+    const savedCompressImages = localStorage.getItem('compressImages')
+    const savedMaxDimension = localStorage.getItem('compressMaxDimension')
+    const savedJpegQuality = localStorage.getItem('compressJpegQuality')
+    const savedPngQuality = localStorage.getItem('compressPngQuality')
+    const savedPngCompression = localStorage.getItem('compressPngCompression')
+    const savedPngEffort = localStorage.getItem('compressPngEffort')
+    const savedGifEffort = localStorage.getItem('compressGifEffort')
+    
+    if (savedCompressImages !== null) {
+      setCompressImages(savedCompressImages === 'true')
+    }
+    if (savedMaxDimension !== null) {
+      setMaxDimension(Number(savedMaxDimension))
+    }
+    if (savedJpegQuality !== null) {
+      setJpegQuality(Number(savedJpegQuality))
+    }
+    if (savedPngQuality !== null) {
+      setPngQuality(Number(savedPngQuality))
+    }
+    if (savedPngCompression !== null) {
+      setPngCompression(Number(savedPngCompression))
+    }
+    if (savedPngEffort !== null) {
+      setPngEffort(Number(savedPngEffort))
+    }
+    if (savedGifEffort !== null) {
+      setGifEffort(Number(savedGifEffort))
+    }
+  }, [])
 
   useEffect(() => {
     // Setup update event handlers
@@ -127,7 +168,7 @@ export function SettingsDialog({
           {/* Appearance Section */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-medium leading-none">Appearance</h3>
+              <h3 className="text-sm font-medium leading-none text-foreground">Appearance</h3>
               <Separator className="flex-1" />
             </div>
             
@@ -169,12 +210,12 @@ export function SettingsDialog({
           {/* Behavior Section */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-medium leading-none">Behavior</h3>
+              <h3 className="text-sm font-medium leading-none text-foreground">Behavior</h3>
               <Separator className="flex-1" />
             </div>
             
             <div className="space-y-4 pl-1">
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <Label htmlFor="auto-lowercase">Auto Lowercase</Label>
@@ -202,6 +243,124 @@ export function SettingsDialog({
                     onCheckedChange={onWordMaskingChange}
                   />
                 </div>
+
+                <div className="space-y-4 pt-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <div className="flex items-center gap-2">
+                        <Image className="h-4 w-4 text-muted-foreground" />
+                        <Label>Image Compression</Label>
+                      </div>
+                      <p className="text-[0.8rem] text-muted-foreground">
+                        Reduce exported package size by compressing images.
+                      </p>
+                    </div>
+                    <Switch
+                      id="image-compression"
+                      checked={compressImages}
+                      onCheckedChange={(v) => {
+                        setCompressImages(v)
+                        localStorage.setItem('compressImages', String(v))
+                      }}
+                    />
+                  </div>
+
+                  {compressImages && (
+                    <div className="space-y-4 p-4 bg-muted/30 rounded-lg border border-border/50 shadow-sm">
+                      <div className="space-y-4">
+                        <Slider
+                          label="Maximum Dimension"
+                          valueLabel={`${maxDimension}px`}
+                          min={640}
+                          max={2048}
+                          step={64}
+                          value={maxDimension}
+                          onChange={(e) => {
+                            const v = Number(e.target.value)
+                            setMaxDimension(v)
+                            localStorage.setItem('compressMaxDimension', String(v))
+                          }}
+                        />
+                        
+                        <Slider
+                          label="JPEG Quality"
+                          valueLabel={`${jpegQuality}%`}
+                          min={50}
+                          max={90}
+                          step={1}
+                          value={jpegQuality}
+                          onChange={(e) => {
+                            const v = Number(e.target.value)
+                            setJpegQuality(v)
+                            localStorage.setItem('compressJpegQuality', String(v))
+                          }}
+                        />
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                          <Slider
+                            label="PNG Quality (palette)"
+                            valueLabel={`${pngQuality}`}
+                            min={50}
+                            max={100}
+                            step={1}
+                            value={pngQuality}
+                            onChange={(e) => {
+                              const v = Number(e.target.value)
+                              setPngQuality(v)
+                              localStorage.setItem('compressPngQuality', String(v))
+                            }}
+                          />
+                          <Slider
+                            label="PNG Compression"
+                            valueLabel={`${pngCompression}`}
+                            min={0}
+                            max={9}
+                            step={1}
+                            value={pngCompression}
+                            onChange={(e) => {
+                              const v = Number(e.target.value)
+                              setPngCompression(v)
+                              localStorage.setItem('compressPngCompression', String(v))
+                            }}
+                          />
+                          <Slider
+                            label="PNG Effort"
+                            valueLabel={`${pngEffort}`}
+                            min={1}
+                            max={10}
+                            step={1}
+                            value={pngEffort}
+                            onChange={(e) => {
+                              const v = Number(e.target.value)
+                              setPngEffort(v)
+                              localStorage.setItem('compressPngEffort', String(v))
+                            }}
+                          />
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                          <Slider
+                            label="GIF Effort"
+                            valueLabel={`${gifEffort}`}
+                            min={1}
+                            max={10}
+                            step={1}
+                            value={gifEffort}
+                            onChange={(e) => {
+                              const v = Number(e.target.value)
+                              setGifEffort(v)
+                              localStorage.setItem('compressGifEffort', String(v))
+                            }}
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="pt-3 border-t border-border/30">
+                        <p className="text-[0.8rem] text-muted-foreground leading-relaxed">
+                          Opaque images are saved as JPEG; images with transparency stay PNG; GIFs stay GIF.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -209,7 +368,7 @@ export function SettingsDialog({
           {/* Updates Section */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-medium leading-none">Updates</h3>
+              <h3 className="text-sm font-medium leading-none text-foreground">Updates</h3>
               <Separator className="flex-1" />
             </div>
             
@@ -237,7 +396,7 @@ export function SettingsDialog({
           {/* About Section */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-medium leading-none">About</h3>
+              <h3 className="text-sm font-medium leading-none text-foreground">About</h3>
               <Separator className="flex-1" />
             </div>
             

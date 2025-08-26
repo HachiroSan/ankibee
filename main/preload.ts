@@ -47,7 +47,7 @@ contextBridge.exposeInMainWorld('electron', {
   clearOldImageCache: (maxAge: number) => ipcRenderer.invoke('image:clear-old', maxAge),
 
   // Anki export methods
-  exportToAnki: (data: { cards: WordCard[]; deckName: string }) => 
+  exportToAnki: (data: { cards: WordCard[]; deckName: string; compression?: { enabled?: boolean; maxDimension?: number; jpegQuality?: number } }) => 
     ipcRenderer.invoke('deck:export-anki', data),
 
   // Update handlers
