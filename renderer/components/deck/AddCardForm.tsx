@@ -103,6 +103,7 @@ export function AddCardForm({ onSubmit, onBatchSubmit, isLoading: formIsLoading,
   const [definitionSource, setDefinitionSource] = useState<'english' | 'malay'>('english');
   const [showMalayDialog, setShowMalayDialog] = useState(false);
 
+
   // Effect to load waveform when audio preview changes
   React.useEffect(() => {
     if (audioPreview?.audioData && audioRef.current) {
@@ -115,7 +116,7 @@ export function AddCardForm({ onSubmit, onBatchSubmit, isLoading: formIsLoading,
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (currentWord && currentDefinition && audioPreview) {
+    if (currentWord) {
       // Check for duplicates first
       const wordToCheck = autoLowercase === true ? currentWord.toLowerCase() : currentWord;
       const isDuplicate = existingCards.some(card => 
@@ -130,9 +131,9 @@ export function AddCardForm({ onSubmit, onBatchSubmit, isLoading: formIsLoading,
       try {
         await onSubmit(
           currentWord, 
-          currentDefinition, 
+          currentDefinition || '', 
           currentAudio,
-          audioPreview.source,
+          audioPreview?.source || 'none',
           currentImage
         );
         // Only clear form after successful submission
@@ -147,10 +148,8 @@ export function AddCardForm({ onSubmit, onBatchSubmit, isLoading: formIsLoading,
         console.error('Error submitting card:', error);
         toast.error(error instanceof Error ? error.message : 'Failed to add card');
       }
-    } else if (!audioPreview) {
-      toast.error('Please fetch and verify audio first');
     } else {
-      toast.error('Please fill in all fields');
+      toast.error('Please enter a word');
     }
   };
 
@@ -372,7 +371,7 @@ export function AddCardForm({ onSubmit, onBatchSubmit, isLoading: formIsLoading,
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-base font-medium">Add New Word</CardTitle>
-              <CardDescription className="text-xs">Create a new spelling bee card with word, definition, and audio.</CardDescription>
+                             <CardDescription className="text-xs">Create a new spelling bee card with word, optional definition, and optional audio.</CardDescription>
             </div>
             <div className="flex items-center gap-2">
               <Tooltip>
@@ -430,9 +429,9 @@ export function AddCardForm({ onSubmit, onBatchSubmit, isLoading: formIsLoading,
                     className="gradio-input h-8 text-sm"
                   />
                 </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-medium">Definition</label>
-                  <DefinitionInput
+                                 <div className="space-y-1.5">
+                   <label className="text-xs font-medium">Definition (Optional)</label>
+                   <DefinitionInput
                     value={currentDefinition}
                     onChange={setCurrentDefinition}
                     onFetchDefinition={handleFetchDefinition}
@@ -446,7 +445,7 @@ export function AddCardForm({ onSubmit, onBatchSubmit, isLoading: formIsLoading,
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-medium">Audio Source</label>
+                  <label className="text-xs font-medium">Audio Source (Optional)</label>
                   <div className="space-y-2">
                     <Select
                       value={audioSource}
@@ -649,11 +648,11 @@ export function AddCardForm({ onSubmit, onBatchSubmit, isLoading: formIsLoading,
 
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button
-                      type="submit"
-                      className="w-full gradio-button bg-primary hover:bg-primary/90"
-                      disabled={formIsLoading || !currentWord || !currentDefinition || !audioPreview}
-                    >
+                                         <Button
+                       type="submit"
+                       className="w-full gradio-button bg-primary hover:bg-primary/90"
+                       disabled={formIsLoading || !currentWord}
+                     >
                       <Plus className="h-4 w-4 mr-2" />
                       Add Card
                     </Button>

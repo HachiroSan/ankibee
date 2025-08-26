@@ -175,11 +175,10 @@ export default function HomePage({ autoLowercase = true }: HomePageProps) {
         audioData = fetchedAudio || undefined;
       }
 
-      if (!audioData) {
-        throw new Error(region 
-          ? `No ${region.toUpperCase()} pronunciation available for "${wordToStore}"`
-          : 'No audio data available'
-        );
+      // Audio is optional now, so we don't throw an error if no audio data
+      // Just log a warning if audio was requested but not available
+      if (audioSource !== 'none' && !audioData) {
+        console.warn(`No audio data available for "${wordToStore}" with source ${audioSource}`);
       }
 
       // Handle image if provided
