@@ -436,7 +436,7 @@ export function AddCardForm({ onSubmit, onBatchSubmit, isLoading: formIsLoading,
                   />
                 </div>
                                  <div className="space-y-1.5">
-                   <label className="text-xs font-medium">Definition (Optional)</label>
+                   <label className="text-xs font-medium">Definition</label>
                    <DefinitionInput
                     value={currentDefinition}
                     onChange={setCurrentDefinition}
@@ -451,7 +451,7 @@ export function AddCardForm({ onSubmit, onBatchSubmit, isLoading: formIsLoading,
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-medium">Audio Source (Optional)</label>
+                  <label className="text-xs font-medium">Audio Source</label>
                   <div className="space-y-2">
                     <Select
                       value={audioSource}
