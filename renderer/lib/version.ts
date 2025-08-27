@@ -1,5 +1,5 @@
 // Version configuration for AnkiBee
-export const APP_VERSION = '1.4.0';
+export const APP_VERSION = '1.5.0';
 export const APP_NAME = 'AnkiBee';
 export const APP_DESCRIPTION = 'Spelling Bee Deck Maker';
 export const BUILD_PLATFORM = 'Windows x64';
